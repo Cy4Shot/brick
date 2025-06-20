@@ -31,7 +31,6 @@ object BrickCompiler {
     context.addProgressBar("compiling", s"Compiling $taskToRun...", 1)
 
     context.logDebug(s"Initializing Brick Compiler for task: $taskToRun")
-    context.startAutoRender()
 
     BrickConcretizer.concretize("Brickfile", taskToRun)
   }

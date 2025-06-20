@@ -90,14 +90,6 @@ class LoggingCtx(title: String, maxLogLines: Int = 12, maxProgressLines: Int = 5
     lastLineCount = lines
   }
 
-  def startAutoRender(intervalMs: Long = 100): Unit = {
-    // No-op - rendering happens on updates now
-  }
-
-  def stopAutoRender(): Unit = {
-    // No-op - no scheduler to stop
-  }
-
   def finish(message: String = "✔ All tasks complete!"): Unit = {
     render() // Final render
     println(Str(message).overlay(Color.Green, 0, message.length))
