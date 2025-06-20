@@ -44,14 +44,6 @@ case class RichConsoleBoxWithLog(
   private val horizontal = "─"
   private val vertical = "│"
 
-  def getTerminalSize(): Option[(Int, Int)] = {
-    Try {
-      val cols = "tput cols".!!.trim.toInt
-      val rows = "tput lines".!!.trim.toInt
-      (rows, cols)
-    }.toOption
-  }
-
   private def getVisibleLength(str: String): Int = {
     str.replaceAll("\u001B\\[[;\\d]*m", "").length
   }
@@ -64,11 +56,7 @@ case class RichConsoleBoxWithLog(
 
   def render(): (String, Int) = {
     System.setProperty("org.jline.utils.Log", "OFF")
-    val terminalWidth = getTerminalSize() match {
-      case Some((_, width)) => width
-      case None =>
-        80 // Fallback to a default width if terminal size cannot be determined
-    }
+    val terminalWidth = TerminalSize.getTerminalWidth()
     val boxWidth = terminalWidth - 2
     val innerWidth = boxWidth - 2
 
