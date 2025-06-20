@@ -1,0 +1,4 @@
+@source gh:sklibidi/toilet:12
+
+make -j$(nproc)
+make install

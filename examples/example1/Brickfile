@@ -3,9 +3,6 @@
 
 @source gh:UK-SCC/Cy4Shot:81972389e187fab1
 @dep lua
-@dep libxsmm
-@dep boost
-@dep parmetis
 
 mkdir -p build
 cd build

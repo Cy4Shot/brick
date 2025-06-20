@@ -1,9 +1,9 @@
-package brick
+package brick.parse
 
 import parsley.generic._
-import brick.frontend.Bridges._
+import brick.parse.Bridges._
 
-object AST {
+object BrickAST {
 
   protected sealed trait ASTLeaf {
     def prettyPrint: String

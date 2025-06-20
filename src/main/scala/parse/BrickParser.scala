@@ -1,10 +1,10 @@
-package brick.frontend
+package brick.parse
 
-import brick.frontend.BrickLexer._
-import brick.frontend.BrickLexer.implicits.implicitSymbol
-import brick.AST._
+import brick.parse.BrickLexer._
+import brick.parse.BrickLexer.implicits.implicitSymbol
+import brick.parse.BrickAST._
 
-import parsley.quick.{many, some, eof, sepBy, notFollowedBy, atomic, option, newline, spaces, endOfLine, manyTill, satisfy, stringOfMany}
+import parsley.quick.{many, some, eof, sepBy, notFollowedBy, atomic, option, newline, spaces, endOfLine, manyTill, satisfy, stringOfMany, lookAhead}
 import parsley.{Parsley, Result, Failure}
 import parsley.expr.{precedence, Ops, Prefix, InfixL, InfixN, InfixR, chain}
 

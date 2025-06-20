@@ -1,4 +1,4 @@
-package brick.frontend
+package brick.parse
 
 
 import parsley.Parsley
