@@ -3,8 +3,6 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
-#define popen_impl _popen
-#define pclose_impl _pclose
 
 int get_terminal_size(int* rows, int* cols) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -26,8 +24,6 @@ int get_terminal_size(int* rows, int* cols) {
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
-#define popen_impl popen
-#define pclose_impl pclose
 
 int get_terminal_size(int* rows, int* cols) {
     struct winsize w;
@@ -42,14 +38,6 @@ int get_terminal_size(int* rows, int* cols) {
 }
 
 #endif
-
-FILE* popen_cmd(const char* command, const char* mode) {
-    return popen_impl(command, mode);
-}
-
-int pclose_cmd(FILE* stream) {
-    return pclose_impl(stream);
-}
 
 int get_terminal_width() {
     int rows, cols;

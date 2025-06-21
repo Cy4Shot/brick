@@ -1,19 +1,10 @@
 package brick
 
-import scala.io.Source
-import scala.collection.mutable
-import java.io.File
-import parsley.Failure
-import parsley.Success
-import brick.conc.BrickConcretizer
-
 import brick.log._
-import scala.concurrent.duration._
-import scala.util.Random
-import scala.Console.{print => cprint}
-import fansi.Str
-import fansi.Color
 import brick.parse.BrickParser.parseString
+import brick.conc.BrickConcretizer
+import brick.conc.BrickTree
+import brick.gen.impl.ConfigGenerator
 
 object BrickCompiler {
   def main(args: Array[String]): Unit = {
@@ -32,6 +23,8 @@ object BrickCompiler {
 
     context.logDebug(s"Initializing Brick Compiler for task: $taskToRun")
 
-    BrickConcretizer.concretize("Brickfile", taskToRun)
+    val tree: BrickTree = BrickConcretizer.concretize("Brickfile", taskToRun)
+
+    ConfigGenerator("test").generateToFile("config.sh")
   }
 }
