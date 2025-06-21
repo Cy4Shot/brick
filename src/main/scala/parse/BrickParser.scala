@@ -4,15 +4,9 @@ import brick.parse.BrickLexer._
 import brick.parse.BrickLexer.implicits.implicitSymbol
 import brick.parse.BrickAST._
 
-import parsley.quick.{many, some, eof, sepBy, notFollowedBy, atomic, option, newline, spaces, endOfLine, manyTill, satisfy, stringOfMany, lookAhead}
-import parsley.{Parsley, Result, Failure}
-import parsley.expr.{precedence, Ops, Prefix, InfixL, InfixN, InfixR, chain}
-
+import parsley.Parsley
+import parsley.quick._
 import parsley.errors.combinator._
-import parsley.errors.patterns.PreventativeErrors
-import parsley.errors.VanillaGen
-import parsley.errors.VanillaGen.UnexpectedItem
-import parsley.errors.VanillaGen.NamedItem
 
 object BrickParser {
   def parseString(input: String) =
