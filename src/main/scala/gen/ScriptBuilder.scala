@@ -5,6 +5,7 @@ import scala.collection.mutable.StringBuilder
 abstract class ScriptBuilder {
   val ext: String
   val threads: String
+  val unix: Boolean = ext == ".sh"
 
   def comment(text: String)(implicit b: StringBuilder): Unit
 

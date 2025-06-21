@@ -4,7 +4,7 @@ import brick.log._
 import brick.parse.BrickParser.parseString
 import brick.conc.BrickConcretizer
 import brick.conc.Bricks
-import brick.gen.impl.ConfigGenerator
+import brick.gen.impl.{ConfigGenerator, UtilsGenerator}
 
 object BrickCompiler {
   def main(args: Array[String]): Unit = {
@@ -26,5 +26,6 @@ object BrickCompiler {
     val tree: Bricks = BrickConcretizer.concretize(taskToRun)
 
     ConfigGenerator("test").generateToFile("config")
+    UtilsGenerator().generateToFile("utils")
   }
 }
