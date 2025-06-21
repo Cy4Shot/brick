@@ -3,7 +3,7 @@ package brick
 import brick.log._
 import brick.parse.BrickParser.parseString
 import brick.conc.BrickConcretizer
-import brick.conc.BrickTree
+import brick.conc.Bricks
 import brick.gen.impl.ConfigGenerator
 
 object BrickCompiler {
@@ -23,7 +23,7 @@ object BrickCompiler {
 
     context.logDebug(s"Initializing Brick Compiler for task: $taskToRun")
 
-    val tree: BrickTree = BrickConcretizer.concretize("Brickfile", taskToRun)
+    val tree: Bricks = BrickConcretizer.concretize(taskToRun)
 
     ConfigGenerator("test").generateToFile("config")
   }
