@@ -11,7 +11,7 @@ abstract class Generator {
 
   def generateToFile(filePath: String): Unit = {
     given builder: ScriptBuilder = Platform.isWindows match {
-      case true  => new PowerShellScriptBuilder()
+      case true  => new BashScriptBuilder()
       case false => new BashScriptBuilder()
     }
 

@@ -5,6 +5,7 @@ import brick.parse.BrickParser.parseString
 import brick.conc.BrickConcretizer
 import brick.conc.Bricks
 import brick.gen.impl.{ConfigGenerator, UtilsGenerator}
+import brick.gen.impl.BricksGenerator
 
 object BrickCompiler {
   def main(args: Array[String]): Unit = {
@@ -27,5 +28,6 @@ object BrickCompiler {
 
     ConfigGenerator("test").generateToFile("config")
     UtilsGenerator().generateToFile("utils")
+    BricksGenerator(tree(1)).generateToFile("bricks")
   }
 }

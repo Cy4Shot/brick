@@ -1,10 +1,9 @@
 package brick.gen.impl
 
-import scala.collection.mutable
-
 import brick.gen._
 import brick.log.LoggingCtx
 import brick.util.NVHPCConfig
+import brick.util.IndentedStringBuilder
 
 class ConfigGenerator(
     val name: String,
@@ -55,7 +54,7 @@ class ConfigGenerator(
   }
 
   def generate()(implicit builder: ScriptBuilder): String = {
-    given config: mutable.StringBuilder = mutable.StringBuilder()
+    given config: IndentedStringBuilder = IndentedStringBuilder()
     
     builder.comment("Welcome to the Brick Config! You may edit this file to customize your build.")
     builder.newline()

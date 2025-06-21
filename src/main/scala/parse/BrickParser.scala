@@ -61,5 +61,5 @@ object BrickParser {
     "/" ~> identifier
 
   private lazy val path: Parsley[String] =
-    many(satisfy(c => c.toInt >= 33 && c.toInt < 127 && !c.isWhitespace)).map(_.mkString)
+    many(satisfy(c => c.toInt >= 33 && c.toInt < 127 && !c.isWhitespace && c != ':')).map(_.mkString)
 }
