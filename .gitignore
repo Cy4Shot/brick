@@ -17,3 +17,5 @@ project/plugins/project/
 
 *.ps1
 *.sh
+
+.scalafmt.conf
