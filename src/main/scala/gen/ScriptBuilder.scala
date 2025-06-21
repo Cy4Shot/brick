@@ -58,7 +58,7 @@ class BashScriptBuilder extends ScriptBuilder {
   override def function(
       name: String
   )(body: => Unit)(implicit b: IndentedStringBuilder): Unit = {
-    b ++= s"function $name() {\n"
+    b ++= s"$name() {\n"
     b.indent()
     body
     b.outdent()
