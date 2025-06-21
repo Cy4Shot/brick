@@ -25,9 +25,9 @@ class ConfigGenerator(
     extends Generator {
 
   var compilerDir: String = ""
-  var threads: String = "$(nproc)"
+  var threads: String = ""
 
-  def validate(): Unit = {
+  def validate()(implicit builder: ScriptBuilder): Unit = {
     if (threadOverride < 0) {
       ctx.exit("Thread override must be a non-negative integer.")
     }
@@ -50,6 +50,8 @@ class ConfigGenerator(
 
     if (threadOverride > 0) {
       threads = threadOverride.toString
+    } else {
+      threads = builder.threads
     }
   }
 
@@ -57,12 +59,14 @@ class ConfigGenerator(
     given config: mutable.StringBuilder = mutable.StringBuilder()
     
     builder.comment("Welcome to the Brick Config! You may edit this file to customize your build.")
+    builder.newline()
 
     builder.comment("Directory Config")
     builder.set("BRICKS_ROOT_DIR", rootDirectory)
     builder.set("TMP_DIR", "${BRICKS_ROOT_DIR}/" + tmpDirectory)
     builder.set("BUILD_DIR", "${BRICKS_ROOT_DIR}/" + buildDirectory)
     builder.set("INSTALL_DIR", "${BRICKS_ROOT_DIR}/" + installDirectory)
+    builder.newline()
 
     builder.comment("Compiler Config")
     builder.set("COMPILER_DIR", compilerDir)
@@ -72,15 +76,18 @@ class ConfigGenerator(
     builder.set("MPICC", mpicc)
     builder.set("MPICXX", mpicxx)
     builder.set("MPIFC", mpifc)
+    builder.newline()
 
     builder.comment("Compilation Options")
     builder.set("GLOBAL_CFLAGS", flags)
     builder.set("GLOBAL_CXXFLAGS", flags)
     builder.set("GLOBAL_FFLAGS", flags)
     builder.set("NUM_THREADS", threads)
+    builder.newline()
 
     if (nvhpc.isDefined) {
       builder.comment("NVHPC Config")
+      builder.newline()
     }
 
     builder.comment("End of Brick Config")
@@ -88,7 +95,6 @@ class ConfigGenerator(
     builder.newline()
     builder.comment("The following options should not be edited")
 
-    builder.comment("Formatting")
     builder.set("FMT_RESET", "\\e[0m")
     builder.set("FMT_COLOR_BLACK", "\\e[30m")
     builder.set("FMT_COLOR_RED", "\\e[31m")

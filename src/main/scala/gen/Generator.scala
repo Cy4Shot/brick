@@ -7,7 +7,7 @@ import brick.util.Platform
 abstract class Generator {
   def generate()(implicit builder: ScriptBuilder): String
 
-  def validate(): Unit
+  def validate()(implicit builder: ScriptBuilder): Unit
 
   def generateToFile(filePath: String): Unit = {
     given builder: ScriptBuilder = Platform.isWindows match {
@@ -17,7 +17,7 @@ abstract class Generator {
 
     validate()
     val content = generate()
-    val writer = new PrintWriter(new File(filePath))
+    val writer = new PrintWriter(new File(filePath + builder.ext))
     try {
       writer.write(content)
     } finally {

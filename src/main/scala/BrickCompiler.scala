@@ -25,6 +25,6 @@ object BrickCompiler {
 
     val tree: BrickTree = BrickConcretizer.concretize("Brickfile", taskToRun)
 
-    ConfigGenerator("test").generateToFile("config.sh")
+    ConfigGenerator("test").generateToFile("config")
   }
 }
