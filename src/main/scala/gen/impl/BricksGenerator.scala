@@ -9,7 +9,7 @@ import brick.util.IndentedStringBuilder
 class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
     extends Generator {
 
-  val name: String = brick.name
+  val name: String = brick.name.toLowerCase
   val NAME: String = brick.name.toUpperCase
 
   def validate()(implicit builder: ScriptBuilder): Unit = {}

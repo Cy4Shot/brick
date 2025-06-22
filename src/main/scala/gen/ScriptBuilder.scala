@@ -5,7 +5,7 @@ import brick.util.IndentedStringBuilder
 abstract class ScriptBuilder {
   val ext: String
   val threads: String
-  val unix: Boolean = ext == ".sh"
+  val unix: Boolean
 
   def comment(text: String)(implicit b: IndentedStringBuilder): Unit
 
@@ -46,6 +46,7 @@ abstract class ScriptBuilder {
 class BashScriptBuilder extends ScriptBuilder {
   override val ext: String = ".sh"
   override val threads: String = "$(nproc)"
+  override val unix: Boolean = true
 
   override def comment(text: String)(implicit b: IndentedStringBuilder): Unit =
     b ++= s"# $text\n"
@@ -53,7 +54,7 @@ class BashScriptBuilder extends ScriptBuilder {
   override def set(variable: String, value: String)(implicit
       b: IndentedStringBuilder
   ): Unit =
-    b ++= s"$variable=\"$value\"\n"
+    b ++= s"export $variable=\"$value\"\n"
 
   override def function(
       name: String
@@ -96,6 +97,7 @@ class PowerShellScriptBuilder extends ScriptBuilder {
   override val ext: String = ".ps1"
   override val threads: String =
     "$(Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty NumberOfLogicalProcessors)"
+  override val unix: Boolean = false
 
   override def comment(text: String)(implicit b: IndentedStringBuilder): Unit =
     b ++= s"# $text\n"
