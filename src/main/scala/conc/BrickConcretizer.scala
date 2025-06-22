@@ -98,7 +98,7 @@ object BrickConcretizer {
     )
   }
 
-  private def flattenToCompilationOrder(root: BrickTree): Bricks = {
+  private def flattenToCompilationOrder(root: BrickTree): List[Brick] = {
     val visited = mutable.Set[String]()
     val result = mutable.ListBuffer[Brick]()
 
@@ -113,15 +113,46 @@ object BrickConcretizer {
     dfs(root)
     result.toList
   }
+
+  private def concretizeTargets(root: String)(using log: LoggingCtx): List[Bricks] = {
+    val brickfilePath = new File(root, "Brickfile")
+    
+    if (!brickfilePath.exists()) {
+      log.exit(s"Brickfile does not exist in $root.")
+    }
+
+    log.logInfo(s"Parsing Brickfile for targets")
+
+    val content =
+      scala.io.Source.fromFile(brickfilePath).getLines().mkString("\n") + "\n"
+    val res = BrickParser.parseString(content) match {
+      case Failure(msg) =>
+        log.exit(s"Error parsing Brickfile:\n$msg")
+      case Success(x) => x
+    }
+
+    // Extract targets from the Brickfile
+    val targets = res.stmts.collect { case BrickAST.TargetFlag(target) => target }
+    
+    if (targets.isEmpty) {
+      log.exit("No targets specified in Brickfile.")
+    }
+
+    log.logInfo(s"Found ${targets.length} targets")
+    log.incrementProgressMax("parsing", targets.length)
+
+    // Concretize each target
+    targets.map { target =>
+      log.logInfo(s"Concretizing target: ${target.opt}")
+      val tree = _concretize(target.opt, root)
+      Bricks(target.opt, flattenToCompilationOrder(tree))
+    }.toList
+  }
   
   def concretize(
       root: String,
       input: Option[String] = None
-  )(using log: LoggingCtx): Bricks = {
-    val tree = input match {
-      case Some(value) => _concretize(value, root)
-      case None        => _concretize("Brickfile", root)
-    }
-    flattenToCompilationOrder(tree)
+  )(using log: LoggingCtx): List[Bricks] = {
+      concretizeTargets(root)
   }
 }

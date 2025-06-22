@@ -1,0 +1,11 @@
+@source url:https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.6.tar.gz
+
+@dep openpmix
+@dep hwloc
+
+./configure \
+    --prefix="${OPENMPI_INSTALL_DIR}" \
+    --with-pmix=${OPENPMIX_DIR} \
+    --with-hwloc=${HWLOC_DIR}
+make -j $NUM_THREADS
+make install

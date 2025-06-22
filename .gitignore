@@ -15,7 +15,6 @@ project/plugins/project/
 .metals/
 .vscode/
 
-*.ps1
-*.sh
+generated/
 
 .scalafmt.conf

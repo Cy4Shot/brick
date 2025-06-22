@@ -2,8 +2,6 @@ package brick.conc
 
 import brick.parse.BrickAST.SourceOpt
 
-type Bricks = List[Brick]
-
 case class BrickTree(
   name: String,
   dependencies: List[BrickTree],
@@ -17,4 +15,9 @@ case class Brick(
   envs: Map[String, String],
   modules: List[String],
   commands: List[String]
+)
+
+case class Bricks(
+  name: String,
+  bricks: List[Brick]
 )

@@ -18,13 +18,14 @@ object BrickParser {
     Program(stmts)
 
   private lazy val stmts: Parsley[List[Stmt]] =
-    many(many(endOfLine) ~> stmt)
+    many(stmt) <~ eof
 
   private lazy val stmt: Parsley[Stmt] =
     "@" ~> flagStmt | commandStmt
 
   private lazy val flagStmt: Parsley[Flag] =
     ModulesFlag("modules" ~> manyTill(moduleOpt, endOfLine))
+      | TargetFlag("target" ~> basicOpt)
       | EnvironmentFlag("env" ~> envOpt)
       | SourceFlag("source" ~> sourceOpt)
       | DependenciesFlag("dep" ~> basicOpt)

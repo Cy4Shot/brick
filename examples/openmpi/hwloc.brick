@@ -1,0 +1,6 @@
+@source gh:open-mpi/hwloc:v2.x
+
+./autogen.sh
+./configure --prefix="${HWLOC_INSTALL_DIR}"
+make -j $NUM_THREADS
+make install

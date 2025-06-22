@@ -7,6 +7,8 @@ import brick.conc.Bricks
 import brick.gen.impl.{ConfigGenerator, UtilsGenerator}
 import brick.gen.impl.BricksGenerator
 
+import java.nio.file.{Files, Path, Paths}
+
 object BrickCompiler {
   def main(args: Array[String]): Unit = {
     if (args.isEmpty) {
@@ -24,10 +26,26 @@ object BrickCompiler {
 
     context.logDebug(s"Initializing Brick Compiler for task: $taskToRun")
 
-    val tree: Bricks = BrickConcretizer.concretize(taskToRun)
+    val tree: List[Bricks] = BrickConcretizer.concretize(taskToRun)
 
-    ConfigGenerator("test").generateToFile("config")
-    UtilsGenerator().generateToFile("utils")
-    BricksGenerator(tree(1)).generateToFile("bricks")
+    for (bricks <- tree) {
+      val path = Paths.get(bricks.name)
+      if (Files.exists(path)) {
+        def deleteRecursively(path: Path): Unit = {
+          if (Files.isDirectory(path)) {
+            Files.list(path).forEach(deleteRecursively)
+          }
+          Files.delete(path)
+        }
+        deleteRecursively(path)
+      }
+      context.logInfo(s"Compiling ${bricks.name} with ${bricks.bricks.size} bricks")
+      ConfigGenerator("test").generateToFile(s"${bricks.name}/config")
+      UtilsGenerator().generateToFile(s"${bricks.name}/utils")
+      for (brick <- bricks.bricks) {
+        context.logInfo(s"Compiling brick: ${brick.name}")
+        BricksGenerator(brick).generateToFile(s"${bricks.name}/pkg/${brick.name}")
+      }
+    }
   }
 }

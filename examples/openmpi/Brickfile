@@ -1,0 +1,3 @@
+@modules nvhpc-hpcx-cuda12/25.5
+
+@target openmpi

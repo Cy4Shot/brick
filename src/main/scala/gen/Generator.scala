@@ -17,7 +17,9 @@ abstract class Generator {
 
     validate()
     val content = generate()
-    val writer = new PrintWriter(new File(filePath + builder.ext))
+    val file = new File("generated/" + filePath + builder.ext)
+    file.getParentFile.mkdirs()
+    val writer = new PrintWriter(file)
     try {
       writer.write(content)
     } finally {

@@ -1,0 +1,6 @@
+@source gh:openpmix/openpmix:v5.0
+
+./autogen.pl
+./configure --prefix="${OPENPMIX_INSTALL_DIR}"
+make -j $NUM_THREADS
+make install
