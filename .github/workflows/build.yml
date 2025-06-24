@@ -28,7 +28,6 @@ jobs:
         uses: olafurpg/setup-scala@v14
         with:
           java-version: '17'
-          scala-version: '3.3.3'
 
       - name: Cache sbt
         uses: actions/cache@v3
