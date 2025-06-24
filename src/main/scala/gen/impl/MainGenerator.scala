@@ -1,0 +1,44 @@
+package brick.gen.impl
+
+import brick.gen._
+import brick.log.LoggingCtx
+import brick.conc.Bricks
+import brick.parse.BrickAST.{GitSource, UrlSource, GithubSource}
+import brick.util.IndentedStringBuilder
+
+class MainGenerator(val bricks: Bricks)(implicit ctx: LoggingCtx)
+    extends Generator {
+
+  val name: String = bricks.name.toLowerCase
+
+  def validate()(implicit builder: ScriptBuilder): Unit = {}
+
+  def generate()(implicit builder: ScriptBuilder): String = {
+    given config: IndentedStringBuilder = IndentedStringBuilder()
+
+    builder.comment(s"Welcome to the compilation script for ${bricks.name}")
+    builder.newline()
+
+    // TODO: Make this cross platform
+    builder.comment("Setting up the environment")
+    builder.raw("set -euxo pipefail")
+    builder.raw("module purge")
+
+    builder.comment("Loading required modules")
+    builder.input("utils")
+    builder.input("config")
+    for (brick <- bricks.bricks) {
+      builder.input(s"pkg/${brick.name.toLowerCase}")
+    }
+    builder.newline()
+
+    builder.comment("Actually building the bricks")
+    builder.call("titleecho", "Compiling bricks")
+
+    for (brick <- bricks.bricks) {
+      builder.call(s"${brick.name.toLowerCase}_full")
+    }
+
+    builder.out()
+  }
+}

@@ -29,7 +29,7 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
         builder.set(s"${NAME}_HASH", brick.source.loc(1))
       }
       case UrlSource(pos) => {
-        builder.set(s"${NAME}_URL", brick.source.loc(0))
+        builder.set(s"${NAME}_URL", brick.source.loc.mkString(":"))
       }
       case GithubSource(_) => {
         builder.set(
@@ -43,9 +43,9 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
 
     builder.comment("Sets the environment variables for compilation!")
     builder.function(name + "_conf") {
-      builder.set("CFLAGS", "GLOBAL_CFLAGS")
-      builder.set("CXXFLAGS", "GLOBAL_CXXFLAGS")
-      builder.set("FCFLAGS", "GLOBAL_FCFLAGS")
+      builder.set("CFLAGS", "$GLOBAL_CFLAGS")
+      builder.set("CXXFLAGS", "$GLOBAL_CXXFLAGS")
+      builder.set("FCFLAGS", "$GLOBAL_FCFLAGS")
     }
 
     builder.comment("Downloads the source code and prepares it for compilation")
@@ -71,21 +71,21 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
       brick.commands.map(builder.raw)
 
       builder.call("popd")
-      builder.call("touch", s"$$${NAME}_ROOT_DIR/${name}.flag")
+      builder.call("touch", s"$$TMP_DIR/${name}.flag")
     }
 
     builder.comment("Sets up the env variables for the next build")
     builder.function(name + "_env") {
-      builder.set("PATH", s"$${${NAME}_INSTALL_DIR}/bin:$$PATH")
-      builder.set("CPATH", s"$${${NAME}_INSTALL_DIR}/include:$$CPATH")
-      builder.set("CMAKE_PREFIX_PATH", s"$${${NAME}_INSTALL_DIR}:$$CMAKE_PREFIX_PATH")
-      builder.set("LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$$LIBRARY_PATH")
-      builder.set("LD_LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$$LD_LIBRARY_PATH")
+      builder.set("PATH", s"$${${NAME}_INSTALL_DIR}/bin:$${PATH:-}")
+      builder.set("CPATH", s"$${${NAME}_INSTALL_DIR}/include:$${CPATH:-}")
+      builder.set("CMAKE_PREFIX_PATH", s"$${${NAME}_INSTALL_DIR}:$${CMAKE_PREFIX_PATH:-}")
+      builder.set("LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$${LIBRARY_PATH:-}")
+      builder.set("LD_LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$${LD_LIBRARY_PATH:-}")
     }
 
     builder.comment(s"Create a full build of $name")
     builder.function(name + "_full") {
-      builder.ifnexists(s"$$${NAME}_ROOT_DIR/${name}.flag") {
+      builder.ifnexists(s"$$TMP_DIR/${name}.flag") {
         builder.call(name + "_get")
         builder.call(name + "_build")
       }

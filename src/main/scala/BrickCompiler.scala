@@ -1,11 +1,9 @@
 package brick
 
 import brick.log._
-import brick.parse.BrickParser.parseString
 import brick.conc.BrickConcretizer
 import brick.conc.Bricks
-import brick.gen.impl.{ConfigGenerator, UtilsGenerator}
-import brick.gen.impl.BricksGenerator
+import brick.gen.impl.{ConfigGenerator, UtilsGenerator, MainGenerator, BricksGenerator}
 
 import java.nio.file.{Files, Path, Paths}
 
@@ -46,6 +44,7 @@ object BrickCompiler {
         context.logInfo(s"Compiling brick: ${brick.name}")
         BricksGenerator(brick).generateToFile(s"${bricks.name}/pkg/${brick.name}")
       }
+      MainGenerator(bricks).generateToFile(s"${bricks.name}/main")
     }
   }
 }

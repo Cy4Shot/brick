@@ -60,10 +60,14 @@ class ConfigGenerator(
     builder.newline()
 
     builder.comment("Directory Config")
-    builder.set("BRICKS_ROOT_DIR", rootDirectory)
+    // TODO: Make this cross-platform
+    builder.raw(s"export BRICKS_ROOT_DIR=$$(readlink -f ./${rootDirectory})")
     builder.set("TMP_DIR", "${BRICKS_ROOT_DIR}/" + tmpDirectory)
     builder.set("BUILD_DIR", "${BRICKS_ROOT_DIR}/" + buildDirectory)
     builder.set("INSTALL_DIR", "${BRICKS_ROOT_DIR}/" + installDirectory)
+    builder.call("mkdir", "-p", "$TMP_DIR")
+    builder.call("mkdir", "-p", "$BUILD_DIR")
+    builder.call("mkdir", "-p", "$INSTALL_DIR")
     builder.newline()
 
     builder.comment("Compiler Config")
@@ -79,7 +83,7 @@ class ConfigGenerator(
     builder.comment("Compilation Options")
     builder.set("GLOBAL_CFLAGS", flags)
     builder.set("GLOBAL_CXXFLAGS", flags)
-    builder.set("GLOBAL_FFLAGS", flags)
+    builder.set("GLOBAL_FCFLAGS", flags)
     builder.set("NUM_THREADS", threads)
     builder.newline()
 

@@ -41,6 +41,8 @@ abstract class ScriptBuilder {
 
   def out()(implicit b: IndentedStringBuilder): String =
     b.mkString
+
+  def input(name: String)(implicit b: IndentedStringBuilder): Unit
 }
 
 class BashScriptBuilder extends ScriptBuilder {
@@ -86,11 +88,14 @@ class BashScriptBuilder extends ScriptBuilder {
       b: IndentedStringBuilder
   ): Unit = args match {
     case Nil => b ++= s"$name\n"
-    case _   => b ++= s"$name \"${args.mkString(" ")}\"\n"
+    case _   => b ++= s"$name ${args.mkString(" ")}\n"
   }
 
   override def out()(implicit b: IndentedStringBuilder): String =
     s"#!/bin/bash\n${b.mkString}"
+
+  override def input(name: String)(implicit b: IndentedStringBuilder): Unit =
+    b ++= s". ./$name$ext\n"
 }
 
 class PowerShellScriptBuilder extends ScriptBuilder {
@@ -138,6 +143,9 @@ class PowerShellScriptBuilder extends ScriptBuilder {
   ): Unit =
     args match {
       case Nil => b ++= s"$name\n"
-      case _   => b ++= s"$name \"${args.mkString(" ")}\"\n"
+      case _   => b ++= s"$name \"${args.mkString("\" \"")}\"\n"
     }
+
+  override def input(name: String)(implicit b: IndentedStringBuilder): Unit =
+    b ++= s". ./$name$ext\n"
 }
