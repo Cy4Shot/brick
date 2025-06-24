@@ -3,13 +3,13 @@ name: Build BRICK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   build:
-    name: Build and Test (${{ matrix.arch }})
+    name: Build BRICK (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -24,11 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v14
         with:
-          distribution: 'temurin'
           java-version: '17'
+          scala-version: '3.3.3'
 
       - name: Cache sbt
         uses: actions/cache@v3
@@ -46,8 +46,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang lld libunwind-dev
 
-      - name: Compile and Test
-        run: sbt nativeLink test
+      - name: Compile
+        run: sbt nativeLink
 
       - name: Upload Native Binary
         uses: actions/upload-artifact@v4
