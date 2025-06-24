@@ -1,6 +1,7 @@
 name: Build BRICK
 
 on:
+  workflow_displatch:
   push:
     branches: [main]
   pull_request:
