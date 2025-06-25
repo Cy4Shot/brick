@@ -85,17 +85,17 @@ jobs:
         run: |
           mkdir -p archpkg
           cat > archpkg/PKGBUILD <<EOF
-pkgname=brick
-pkgver=$VERSION
-pkgrel=1
-arch=('${RPM_ARCH}')
-url="https://cy4.dev/brick"
-license=('MIT')
-depends=()
-source=('brick-linux-${RPM_ARCH}')
-package() {
-  install -Dm755 "\$srcdir/brick-linux-\$RPM_ARCH" "\$pkgdir/usr/bin/brick"
-}
+          pkgname=brick
+          pkgver=$VERSION
+          pkgrel=1
+          arch=('${RPM_ARCH}')
+          url="https://cy4.dev/brick"
+          license=('MIT')
+          depends=()
+          source=('brick-linux-${RPM_ARCH}')
+          package() {
+            install -Dm755 "\$srcdir/brick-linux-\$RPM_ARCH" "\$pkgdir/usr/bin/brick"
+          }
           EOF
           cp bin/brick archpkg/brick-linux-${RPM_ARCH}
           cd archpkg
@@ -103,8 +103,8 @@ package() {
           cp brick-*.pkg.tar.zst ../dist/
           rm -f brick-*.tar.zst
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: packages
-        path: dist/
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: dist/
