@@ -8,7 +8,7 @@ object Validator {
       compilerType: String,
       required: Boolean = true
   )(implicit ctx: LoggingCtx): String =
-    GenHelper.whichExecutable(executable) match {
+    brick.link.GenHelper.whichExecutable(executable) match {
       case Some(path) => path
       case None =>
         if (required)

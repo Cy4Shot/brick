@@ -1,4 +1,4 @@
-package brick.log
+package brick.link
 
 import scala.scalanative.unsafe._
 import scala.scalanative.unsigned._

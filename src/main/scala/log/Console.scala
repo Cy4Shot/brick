@@ -56,7 +56,7 @@ case class RichConsoleBoxWithLog(
 
   def render(): (String, Int) = {
     System.setProperty("org.jline.utils.Log", "OFF")
-    val terminalWidth = TerminalSize.getTerminalWidth()
+    val terminalWidth = brick.link.TerminalSize.getTerminalWidth()
     val boxWidth = terminalWidth - 2
     val innerWidth = boxWidth - 2
 

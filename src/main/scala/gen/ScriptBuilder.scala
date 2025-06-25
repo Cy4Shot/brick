@@ -1,11 +1,14 @@
 package brick.gen
 
 import brick.util.IndentedStringBuilder
+import brick.link.PacmanHelper
 
 abstract class ScriptBuilder {
   val ext: String
   val threads: String
   val unix: Boolean
+
+  val pacman = PacmanHelper.getPackageManager()
 
   def comment(text: String)(implicit b: IndentedStringBuilder): Unit
 
@@ -41,6 +44,9 @@ abstract class ScriptBuilder {
 
   def out()(implicit b: IndentedStringBuilder): String =
     b.mkString
+
+  def install(pkg: String)(implicit b: IndentedStringBuilder): Unit =
+    pacman.foreach { b ++= _ + s" install $pkg\n" }
 
   def input(name: String)(implicit b: IndentedStringBuilder): Unit
 }

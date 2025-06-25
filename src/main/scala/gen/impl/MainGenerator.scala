@@ -23,6 +23,7 @@ class MainGenerator(val bricks: Bricks)(implicit ctx: LoggingCtx)
     builder.comment("Setting up the environment")
     builder.raw("set -euxo pipefail")
     builder.raw("module purge")
+    builder.newline()
 
     builder.comment("Loading required modules")
     builder.input("utils")

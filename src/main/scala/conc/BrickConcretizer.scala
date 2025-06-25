@@ -9,6 +9,7 @@ import brick.parse.BrickAST
 import brick.log.LoggingCtx
 
 import parsley.{Success, Failure}
+import brick.parse.BrickAST.BasicOpt
 
 object BrickConcretizer {
 
@@ -77,6 +78,9 @@ object BrickConcretizer {
       )
       .toList
 
+    val packages = res.stmts
+      .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
+      
     val commands = res.stmts
       .collect { case BrickAST.CommandStmt(command) => command }
       .filter(_.nonEmpty)
@@ -93,7 +97,8 @@ object BrickConcretizer {
         source = source,
         envs = envs,
         modules = modules,
-        commands = commands
+        commands = commands,
+        packages =  packages
       )
     )
   }

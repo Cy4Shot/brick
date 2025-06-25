@@ -14,7 +14,8 @@ case class Brick(
   source: SourceOpt,
   envs: Map[String, String],
   modules: List[String],
-  commands: List[String]
+  commands: List[String],
+  packages: List[String]
 )
 
 case class Bricks(

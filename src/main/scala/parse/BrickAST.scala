@@ -36,6 +36,10 @@ object BrickAST {
     override def prettyPrint: String = "dep " + dependency.prettyPrint
   }
 
+  case class PackageFlag(pkg: BasicOpt)(override val pos: Pos) extends Flag {
+    override def prettyPrint: String = "pkg " + pkg.prettyPrint
+  }
+
   case class CommandStmt(command: String)(override val pos: Pos) extends Stmt {
     override def prettyPrint: String = command
   }
@@ -82,6 +86,7 @@ object BrickAST {
   object SourceFlag extends ParserBridgePos1[SourceOpt, SourceFlag]
   object TargetFlag extends ParserBridgePos1[BasicOpt, TargetFlag]
   object DependenciesFlag extends ParserBridgePos1[BasicOpt, DependenciesFlag]
+  object PackageFlag extends ParserBridgePos1[BasicOpt, PackageFlag]
 
   object GitSource extends ParserBridgePos0[GitSource]
   object UrlSource extends ParserBridgePos0[UrlSource]

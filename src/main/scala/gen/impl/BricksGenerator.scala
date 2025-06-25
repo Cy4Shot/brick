@@ -46,6 +46,9 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
       builder.set("CFLAGS", "$GLOBAL_CFLAGS")
       builder.set("CXXFLAGS", "$GLOBAL_CXXFLAGS")
       builder.set("FCFLAGS", "$GLOBAL_FCFLAGS")
+      for (pkg <- brick.packages) {
+        builder.install(pkg)
+      }
     }
 
     builder.comment("Downloads the source code and prepares it for compilation")

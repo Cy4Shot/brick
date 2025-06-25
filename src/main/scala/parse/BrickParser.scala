@@ -29,6 +29,7 @@ object BrickParser {
       | EnvironmentFlag("env" ~> envOpt)
       | SourceFlag("source" ~> sourceOpt)
       | DependenciesFlag("dep" ~> basicOpt)
+      | PackageFlag("pkg" ~> basicOpt)
 
   private lazy val moduleOpt: Parsley[ModuleOpt] =
     ModuleOpt(identifier, option(version))

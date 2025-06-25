@@ -1,4 +1,4 @@
-package brick.gen
+package brick.link
 
 import scala.scalanative.unsafe._
 import scala.scalanative.unsigned._
