@@ -97,9 +97,9 @@ jobs:
           mkdir -p apt-repo/rpm/
           cp dist/*.rpm apt-repo/rpm/
 
-      - name: Install reprepro and createrepo_c
+      - name: Install reprepro and createrepo
         run: |
-          sudo apt install -y reprepro createrepo_c
+          sudo apt install -y reprepro createrepo
 
       - name: Update Debian repo with reprepro
         run: |
@@ -109,9 +109,9 @@ jobs:
           done
           rm -rf incoming
 
-      - name: Update YUM repo with createrepo_c
+      - name: Update YUM repo with createrepo
         run: |
-          createrepo_c --update apt-repo/rpm
+          createrepo --update apt-repo/rpm
 
       - name: Commit & push updated repo
         run: |
