@@ -100,7 +100,7 @@ jobs:
       - name: Install reprepro and createrepo
         run: |
           sudo apt install -y guix reprepro
-          guix install -y createrepo-c
+          guix install createrepo-c
 
       - name: Update Debian repo with reprepro
         run: |
