@@ -96,9 +96,6 @@ jobs:
           
           mkdir -p apt-repo/rpm/
           cp dist/*.rpm apt-repo/rpm/
-          
-          mkdir -p apt-repo/arch/
-          cp dist/*.pkg.tar.zst apt-repo/arch/
 
       - name: Update Debian repo with reprepro
         run: |
