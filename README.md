@@ -14,4 +14,4 @@ BRICK is a build tool to generate fast buildscripts for complicated programs wit
 
 # Installation & Docs
 
-For installation and docs, check out the [BRICK website](cy4.dev/brick).
+For installation and docs, check out the [BRICK website](https://cy4.dev/brick).
