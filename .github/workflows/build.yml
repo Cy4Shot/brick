@@ -88,6 +88,7 @@ jobs:
         with:
           repository: Cy4Shot/repo
           path: apt-repo
+          token: ${{ secrets.TARGET_REPO_PAT }}
 
       - name: Copy packages into apt-repo
         run: |
