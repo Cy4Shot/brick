@@ -191,7 +191,7 @@ jobs:
         run: |
           GUIX_PROFILE="/home/runner/.guix-profile"
           . "$GUIX_PROFILE/etc/profile"
-          mkdor -p apt-repo/rpm
+          mkdir -p apt-repo/rpm
           createrepo_c --update apt-repo/rpm
 
       - name: Commit, pull, merge & push updated repo
