@@ -1,7 +1,7 @@
 name: Build BRICK
 
 env:
-  VERSION: A1.0
+  BRICK_VERSION: ${{ github.run_id }}
 
 on:
   workflow_dispatch:
@@ -77,11 +77,11 @@ jobs:
         run: |
           nfpm pkg --packager deb \
             --config share/nfpm/${NFPM_ARCH}.yaml \
-            --target dist/brick_${VERSION}_${NFPM_ARCH}.deb
+            --target dist/brick_${BRICK_VERSION}_${NFPM_ARCH}.deb
 
           nfpm pkg --packager rpm \
             --config share/nfpm/${NFPM_ARCH}.yaml \
-            --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm
+            --target dist/brick-${BRICK_VERSION}-1.${RPM_ARCH}.rpm
 
       - name: Checkout apt-repo
         uses: actions/checkout@v3
