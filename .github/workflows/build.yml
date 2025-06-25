@@ -117,8 +117,9 @@ jobs:
 
       - name: Update YUM repo with createrepo
         run: |
-          which createrepo*
-          createrepo --update apt-repo/rpm
+          GUIX_PROFILE="/home/runner/.guix-profile"
+          . "$GUIX_PROFILE/etc/profile"
+          createrepo_c --update apt-repo/rpm
 
       - name: Commit & push updated repo
         run: |
