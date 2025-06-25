@@ -53,3 +53,58 @@ jobs:
         with:
           name: brick-linux-${{ matrix.arch }}
           path: target/scala-*/brick
+
+      - name: Prepare nfpm
+        run: |
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            echo "NFPM_ARCH=amd64" >> $GITHUB_ENV
+            echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
+          else
+            echo "NFPM_ARCH=arm64" >> $GITHUB_ENV
+            echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
+          fi
+          mkdir -p dist
+          mkdir -p bin
+          cp target/scala-*/brick bin/brick
+      
+      - name: Build Packages
+        run: |
+          nfpm pkg --packager deb \
+            --config nfpm.yaml \
+            --target dist/brick_${VERSION}_${NFPM_ARCH}.deb \
+            --env ARCH=${NFPM_ARCH} \
+            --env VERSION=${VERSION}
+
+          nfpm pkg --packager rpm \
+            --config nfpm.yaml \
+            --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm \
+            --env ARCH=${NFPM_ARCH} \
+            --env VERSION=${VERSION}
+      
+      - name: Create Arch PKGBUILD
+        run: |
+        mkdir -p archpkg
+        cat > archpkg/PKGBUILD <<EOF
+pkgname=brick
+pkgver=$VERSION
+pkgrel=1
+arch=('${RPM_ARCH}')
+url="https://cy4.dev/brick"
+license=('MIT')
+depends=()
+source=('brick-linux-${RPM_ARCH}')
+package() {
+  install -Dm755 "\$srcdir/brick-linux-\$RPM_ARCH" "\$pkgdir/usr/bin/brick"
+}
+EOF
+        cp bin/brick archpkg/brick-linux-${RPM_ARCH}
+        cd archpkg
+        makepkg --nodeps --force --noprogressbar --skipchecksums
+        cp brick-*.pkg.tar.zst ../dist/
+        rm -f brick-*.tar.zst
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages
+        path: dist/

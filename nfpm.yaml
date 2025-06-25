@@ -1,0 +1,13 @@
+name: brick
+arch: ${ARCH}
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: Tom Shtasel <tom.shtasel@gmail.com>
+description: A build tool for large programs
+homepage: https://cy4.dev/brick
+license: MIT
+bindir: /usr/local/bin
+files:
+  ./bin/brick: /usr/local/bin/brick
