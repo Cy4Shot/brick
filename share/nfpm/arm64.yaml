@@ -1,7 +1,7 @@
 name: brick
 arch: arm64
 platform: linux
-version: nightly-${BRICK_VERSION}
+version: ${BRICK_VERSION}
 version_schema: semver
 maintainer: Tom Shtasel <tom.shtasel@gmail.com>
 description: A  build tool for large programs
