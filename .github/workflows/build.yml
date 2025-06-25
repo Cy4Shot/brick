@@ -102,6 +102,16 @@ jobs:
           sudo apt install -y guix reprepro
           guix install createrepo-c
 
+      - name: Import GPG key
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
+          echo "allow-preset-passphrase" > ~/.gnupg/gpg-agent.conf
+          echo RELOADAGENT | gpg-connect-agent
+          echo "$GPG_PASSPHRASE" | /usr/lib/gnupg/gpg-preset-passphrase -v --preset $(gpg --list-secret-keys --with-keygrip | grep -A1 "$GPG_KEY_ID" | tail -n1 | awk '{print $1}')
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Update Debian repo with reprepro
         run: |
           cd apt-repo/debian
