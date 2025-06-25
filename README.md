@@ -11,3 +11,7 @@ BRICK is a build tool to generate fast buildscripts for complicated programs wit
 
 > [!CAUTION]
 > Only Linux and bash is currently supported. Other platforms may be supported in the future.
+
+# Installation & Docs
+
+For installation and docs, check out the [BRICK website](https://cy4.dev/brick).
