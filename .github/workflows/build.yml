@@ -83,8 +83,40 @@ jobs:
             --config share/nfpm/${NFPM_ARCH}.yaml \
             --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Checkout apt-repo
+        uses: actions/checkout@v3
         with:
-          name: packages_${{ matrix.arch }}
-          path: dist/
+          repository: Cy4Shot/repo
+          path: apt-repo
+
+      - name: Copy packages into apt-repo
+        run: |
+          mkdir -p apt-repo/debian/incoming
+          cp dist/*.deb apt-repo/debian/incoming/
+          
+          mkdir -p apt-repo/rpm/
+          cp dist/*.rpm apt-repo/rpm/
+          
+          mkdir -p apt-repo/arch/
+          cp dist/*.pkg.tar.zst apt-repo/arch/
+
+      - name: Update Debian repo with reprepro
+        run: |
+          cd apt-repo/debian
+          for f in incoming/*.deb; do
+            reprepro -Vb . includedeb stable "$f"
+          done
+          rm -rf incoming
+
+      - name: Update YUM repo with createrepo_c
+        run: |
+          createrepo_c --update apt-repo/rpm
+
+      - name: Commit & push updated repo
+        run: |
+          cd apt-repo
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update package repo with new packages"
+          git push
