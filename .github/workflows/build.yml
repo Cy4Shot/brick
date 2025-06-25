@@ -99,7 +99,8 @@ jobs:
 
       - name: Install reprepro and createrepo
         run: |
-          sudo apt install -y reprepro createrepo
+          sudo apt install -y guix reprepro
+          guix install -y createrepo-c
 
       - name: Update Debian repo with reprepro
         run: |
@@ -111,7 +112,7 @@ jobs:
 
       - name: Update YUM repo with createrepo
         run: |
-          createrepo --update apt-repo/rpm
+          createrepo_c --update apt-repo/rpm
 
       - name: Commit & push updated repo
         run: |
