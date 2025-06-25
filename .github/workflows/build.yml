@@ -12,27 +12,18 @@ on:
     types: [published]
 
 jobs:
-  build:
-    name: Build BRICK (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        arch: [x86_64, arm64]
-        include:
-          - arch: x86_64
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-    
+  build-x86_64:
+    name: Build BRICK (x86_64)
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Scala
         uses: olafurpg/setup-scala@v14
         with:
           java-version: '17'
-      
+
       - name: Cache sbt
         uses: actions/cache@v3
         with:
@@ -40,97 +31,169 @@ jobs:
             ~/.ivy2/cache
             ~/.sbt
             ~/.coursier
-          key: sbt-cache-${{ matrix.arch }}-${{ hashFiles('**/build.sbt') }}
+          key: sbt-cache-x86_64-${{ hashFiles('**/build.sbt') }}
           restore-keys: |
-            sbt-cache-${{ matrix.arch }}-
-      
+            sbt-cache-x86_64-
+
       - name: Install LLVM and dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang lld libunwind-dev
-      
+
       - name: Compile
         run: sbt nativeLink
-      
+
       - name: Upload Native Binary
         uses: actions/upload-artifact@v4
         with:
-          name: brick-linux-${{ matrix.arch }}
+          name: brick-linux-x86_64
           path: target/scala-*/brick
-      
+
       - name: Prepare nfpm
         if: github.event_name == 'release'
         run: |
-          if [ "${{ matrix.arch }}" = "x86_64" ]; then
-            echo "NFPM_ARCH=amd64" >> $GITHUB_ENV
-            echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
-          else
-            echo "NFPM_ARCH=arm64" >> $GITHUB_ENV
-            echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
-          fi
-          mkdir -p dist
-          mkdir -p bin
+          echo "NFPM_ARCH=amd64" >> $GITHUB_ENV
+          echo "RPM_ARCH=x86_64" >> $GITHUB_ENV
+          mkdir -p dist bin
           cp target/scala-*/brick bin/brick
           echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
           sudo apt update
           sudo apt install nfpm
-      
+
       - name: Build Packages
         if: github.event_name == 'release'
         run: |
           nfpm pkg --packager deb \
-            --config share/nfpm/${NFPM_ARCH}.yaml \
-            --target dist/brick_${BRICK_VERSION}_${NFPM_ARCH}.deb
+            --config share/nfpm/amd64.yaml \
+            --target dist/brick_${BRICK_VERSION}_amd64.deb
           nfpm pkg --packager rpm \
-            --config share/nfpm/${NFPM_ARCH}.yaml \
-            --target dist/brick-${BRICK_VERSION}-1.${RPM_ARCH}.rpm
-      
-      - name: Checkout apt-repo
+            --config share/nfpm/amd64.yaml \
+            --target dist/brick-${BRICK_VERSION}-1.x86_64.rpm
+
+      - name: Upload packages for repo
         if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-x86_64
+          path: dist/*
+
+  build-arm64:
+    name: Build BRICK (arm64)
+    runs-on: ubuntu-24.04-arm
+    needs: build-x86_64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v14
+        with:
+          java-version: '17'
+
+      - name: Cache sbt
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+            ~/.coursier
+          key: sbt-cache-arm64-${{ hashFiles('**/build.sbt') }}
+          restore-keys: |
+            sbt-cache-arm64-
+
+      - name: Install LLVM and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld libunwind-dev
+
+      - name: Compile
+        run: sbt nativeLink
+
+      - name: Upload Native Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: brick-linux-arm64
+          path: target/scala-*/brick
+
+      - name: Prepare nfpm
+        if: github.event_name == 'release'
+        run: |
+          echo "NFPM_ARCH=arm64" >> $GITHUB_ENV
+          echo "RPM_ARCH=aarch64" >> $GITHUB_ENV
+          mkdir -p dist bin
+          cp target/scala-*/brick bin/brick
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt update
+          sudo apt install nfpm
+
+      - name: Build Packages
+        if: github.event_name == 'release'
+        run: |
+          nfpm pkg --packager deb \
+            --config share/nfpm/arm64.yaml \
+            --target dist/brick_${BRICK_VERSION}_arm64.deb
+          nfpm pkg --packager rpm \
+            --config share/nfpm/arm64.yaml \
+            --target dist/brick-${BRICK_VERSION}-1.aarch64.rpm
+
+      - name: Upload packages for repo
+        if: github.event_name == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-arm64
+          path: dist/*
+
+  update-repo:
+    name: Update Repositories
+    needs: [build-arm64]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download all packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: dist
+
+      - name: Checkout apt-repo
         uses: actions/checkout@v3
         with:
           repository: Cy4Shot/repo
           path: apt-repo
           token: ${{ secrets.TARGET_REPO_PAT }}
-      
+
       - name: Copy packages into apt-repo
-        if: github.event_name == 'release'
         run: |
           mkdir -p apt-repo/debian/incoming
-          cp dist/*.deb apt-repo/debian/incoming/
+          cp dist/**/*.deb apt-repo/debian/incoming/
           mkdir -p apt-repo/rpm/
-          cp dist/*.rpm apt-repo/rpm/
-      
+          cp dist/**/*.rpm apt-repo/rpm/
+
       - name: Install reprepro and createrepo
-        if: github.event_name == 'release'
         run: |
           sudo apt install -y guix reprepro
           guix install createrepo-c
-      
+
       - name: Import GPG key
-        if: github.event_name == 'release'
         run: echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      
+
       - name: Update Debian repo with reprepro
-        if: github.event_name == 'release'
         run: |
           cd apt-repo/debian
           for f in incoming/*.deb; do
             reprepro -Vb . includedeb stable "$f"
           done
           rm -rf incoming
-      
+
       - name: Update YUM repo with createrepo
-        if: github.event_name == 'release'
         run: |
           GUIX_PROFILE="/home/runner/.guix-profile"
           . "$GUIX_PROFILE/etc/profile"
-          createrepo_c --update apt-repo/rpm
-      
+          createrepo_c --update ../rpm
+
       - name: Commit, pull, merge & push updated repo
-        if: github.event_name == 'release'
         run: |
           cd apt-repo
           git config user.name "GitHub Actions"
