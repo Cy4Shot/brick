@@ -1,7 +1,6 @@
 name: Build BRICK
-
 env:
-  BRICK_VERSION: ${{ github.run_id }}
+  BRICK_VERSION: A1.0
 
 on:
   workflow_dispatch:
@@ -9,6 +8,8 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -22,16 +23,16 @@ jobs:
             runner: ubuntu-24.04
           - arch: arm64
             runner: ubuntu-24.04-arm
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+      
       - name: Setup Scala
         uses: olafurpg/setup-scala@v14
         with:
           java-version: '17'
-
+      
       - name: Cache sbt
         uses: actions/cache@v3
         with:
@@ -42,22 +43,23 @@ jobs:
           key: sbt-cache-${{ matrix.arch }}-${{ hashFiles('**/build.sbt') }}
           restore-keys: |
             sbt-cache-${{ matrix.arch }}-
-
+      
       - name: Install LLVM and dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang lld libunwind-dev
-
+      
       - name: Compile
         run: sbt nativeLink
-
+      
       - name: Upload Native Binary
         uses: actions/upload-artifact@v4
         with:
           name: brick-linux-${{ matrix.arch }}
           path: target/scala-*/brick
-
+      
       - name: Prepare nfpm
+        if: github.event_name == 'release'
         run: |
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             echo "NFPM_ARCH=amd64" >> $GITHUB_ENV
@@ -74,55 +76,61 @@ jobs:
           sudo apt install nfpm
       
       - name: Build Packages
+        if: github.event_name == 'release'
         run: |
           nfpm pkg --packager deb \
             --config share/nfpm/${NFPM_ARCH}.yaml \
             --target dist/brick_${BRICK_VERSION}_${NFPM_ARCH}.deb
-
           nfpm pkg --packager rpm \
             --config share/nfpm/${NFPM_ARCH}.yaml \
             --target dist/brick-${BRICK_VERSION}-1.${RPM_ARCH}.rpm
-
+      
       - name: Checkout apt-repo
+        if: github.event_name == 'release'
         uses: actions/checkout@v3
         with:
           repository: Cy4Shot/repo
           path: apt-repo
           token: ${{ secrets.TARGET_REPO_PAT }}
-
+      
       - name: Copy packages into apt-repo
+        if: github.event_name == 'release'
         run: |
           mkdir -p apt-repo/debian/incoming
           cp dist/*.deb apt-repo/debian/incoming/
-          
           mkdir -p apt-repo/rpm/
           cp dist/*.rpm apt-repo/rpm/
-
+      
       - name: Install reprepro and createrepo
+        if: github.event_name == 'release'
         run: |
           sudo apt install -y guix reprepro
           guix install createrepo-c
-
+      
       - name: Import GPG key
+        if: github.event_name == 'release'
         run: echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-
+      
       - name: Update Debian repo with reprepro
+        if: github.event_name == 'release'
         run: |
           cd apt-repo/debian
           for f in incoming/*.deb; do
             reprepro -Vb . includedeb stable "$f"
           done
           rm -rf incoming
-
+      
       - name: Update YUM repo with createrepo
+        if: github.event_name == 'release'
         run: |
           GUIX_PROFILE="/home/runner/.guix-profile"
           . "$GUIX_PROFILE/etc/profile"
           createrepo_c --update apt-repo/rpm
-
+      
       - name: Commit, pull, merge & push updated repo
+        if: github.event_name == 'release'
         run: |
           cd apt-repo
           git config user.name "GitHub Actions"
