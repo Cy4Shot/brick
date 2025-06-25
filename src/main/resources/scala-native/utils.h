@@ -21,7 +21,7 @@ char* find_executable_in_path(const char* exe_name) {
         return NULL;
     }
     
-    char* path_copy = malloc(strlen(path_env) + 1);
+    char* path_copy = (char*)malloc(strlen(path_env) + 1);
     strcpy(path_copy, path_env);
     
     char* token = strtok(path_copy, PATH_SEPARATOR);
