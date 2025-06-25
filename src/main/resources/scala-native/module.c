@@ -33,47 +33,6 @@ static const char* module_env_vars[] = {
     NULL
 };
 
-char* find_executable_in_path(const char* exe_name) {
-    char* path_env = getenv("PATH");
-    if (!path_env) {
-        return NULL;
-    }
-    
-    char* path_copy = malloc(strlen(path_env) + 1);
-    strcpy(path_copy, path_env);
-    
-    char* token = strtok(path_copy, PATH_SEPARATOR);
-    static char full_path[4096];
-    
-    while (token != NULL) {
-#ifdef _WIN32
-        // Try with .exe extension
-        snprintf(full_path, sizeof(full_path), "%s\\%s.exe", token, exe_name);
-        if (ACCESS_CHECK(full_path)) {
-            free(path_copy);
-            return _strdup(exe_name);
-        }
-        
-        // Try without extension
-        snprintf(full_path, sizeof(full_path), "%s\\%s", token, exe_name);
-        if (ACCESS_CHECK(full_path)) {
-            free(path_copy);
-            return _strdup(exe_name);
-        }
-#else
-        snprintf(full_path, sizeof(full_path), "%s/%s", token, exe_name);
-        if (ACCESS_CHECK(full_path)) {
-            free(path_copy);
-            return strdup(exe_name);
-        }
-#endif
-        token = strtok(NULL, PATH_SEPARATOR);
-    }
-    
-    free(path_copy);
-    return NULL;
-}
-
 int check_module_env_vars() {
     for (int i = 0; module_env_vars[i] != NULL; i++) {
         if (getenv(module_env_vars[i]) != NULL) {
