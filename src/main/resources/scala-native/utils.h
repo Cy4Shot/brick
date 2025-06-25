@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,3 +58,5 @@ char* find_executable_in_path(const char* exe_name) {
     free(path_copy);
     return NULL;
 }
+
+#endif // UTILS_H
