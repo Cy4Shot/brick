@@ -61,7 +61,7 @@ char* find_executable_in_path(const char* exe_name) {
         snprintf(full_path, sizeof(full_path), "%s/%s", token, exe_name);
         if (ACCESS_CHECK(full_path)) {
             free(path_copy);
-            return _strdup(exe_name);
+            return strdup(exe_name);
         }
 #endif
         token = strtok(NULL, PATH_SEPARATOR);
