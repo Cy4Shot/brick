@@ -74,15 +74,11 @@ jobs:
         run: |
           nfpm pkg --packager deb \
             --config nfpm.yaml \
-            --target dist/brick_${VERSION}_${NFPM_ARCH}.deb \
-            --env ARCH=${NFPM_ARCH} \
-            --env VERSION=${VERSION}
+            --target dist/brick_${VERSION}_${NFPM_ARCH}.deb
 
           nfpm pkg --packager rpm \
             --config nfpm.yaml \
-            --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm \
-            --env ARCH=${NFPM_ARCH} \
-            --env VERSION=${VERSION}
+            --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm
       
       - name: Create Arch PKGBUILD
         run: |
