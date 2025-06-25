@@ -1,0 +1,13 @@
+name: brick
+arch: amd64
+platform: linux
+version: nightly
+version_schema: semver
+maintainer: Tom Shtasel <tom.shtasel@gmail.com>
+description: A  build tool for large programs
+homepage: https://cy4.dev/brick
+license: MIT
+
+contents:
+  - src: ./bin/brick
+    dst: /usr/local/bin/brick

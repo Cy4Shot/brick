@@ -73,11 +73,11 @@ jobs:
       - name: Build Packages
         run: |
           nfpm pkg --packager deb \
-            --config nfpm.yaml \
+            --config share/nfpm/${NFPM_ARCH}.yaml \
             --target dist/brick_${VERSION}_${NFPM_ARCH}.deb
 
           nfpm pkg --packager rpm \
-            --config nfpm.yaml \
+            --config share/nfpm/${NFPM_ARCH}.yaml \
             --target dist/brick-${VERSION}-1.${RPM_ARCH}.rpm
       
       - name: Create Arch PKGBUILD
