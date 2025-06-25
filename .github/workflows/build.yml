@@ -1,6 +1,6 @@
 name: Build BRICK
 env:
-  BRICK_VERSION: A1.0
+  BRICK_VERSION: 0.1.0
 
 on:
   workflow_dispatch:
