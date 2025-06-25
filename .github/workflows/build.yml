@@ -122,11 +122,12 @@ jobs:
           . "$GUIX_PROFILE/etc/profile"
           createrepo_c --update apt-repo/rpm
 
-      - name: Commit & push updated repo
+      - name: Commit, pull, merge & push updated repo
         run: |
           cd apt-repo
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Update package repo with new packages"
+          git commit -m "Update package repo with new packages" || true
+          git pull --rebase
           git push
