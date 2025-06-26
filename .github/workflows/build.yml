@@ -1,6 +1,4 @@
 name: Build BRICK
-env:
-  BRICK_VERSION: 0.1.0
 
 on:
   workflow_dispatch:
@@ -48,6 +46,11 @@ jobs:
         with:
           name: brick-linux-x86_64
           path: target/scala-*/brick
+
+      - name: Determine Release Number
+        if: github.event_name == 'release'
+        run: |
+            echo "BRICK_VERSION=$(echo ${GITHUB_REF##*/} | sed 's/[^0-9.]//g')" >> $GITHUB_ENV
 
       - name: Prepare nfpm
         if: github.event_name == 'release'

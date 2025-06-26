@@ -1,0 +1,6 @@
+@source url:https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz
+
+@dep openmpi
+
+cp setup/Make.Linux_Intel64 .
+CC=$MPICC make arch=Linux_Intel64 -j $NUM_THREADS
