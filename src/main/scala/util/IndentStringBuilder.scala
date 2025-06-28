@@ -16,6 +16,17 @@ class IndentedStringBuilder(indentStep: String = "  ") {
       currentIndent = currentIndent.substring(0, currentIndent.length - indentStep.length)
   }
 
+  def getCurrentIndent: String = currentIndent
+
+  def setIndent(indent: String): Unit = {
+    currentIndent = indent
+  }
+
+  def appendRaw(text: String): this.type = {
+    sb.append(text)
+    this
+  }
+
   def append(text: String): this.type = {
     if (text.isEmpty) return this
     
