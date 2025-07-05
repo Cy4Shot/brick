@@ -1,6 +1,6 @@
 @source url:https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz
 
-@dep openmpi
+@dep openblas
 
 echo "Creating make file for HPL..."
 cd setup || exit
@@ -9,6 +9,8 @@ cp Make.UNKNOWN ../Make.brick
 cd ..
 
 sed -i "s|^ARCH\s*=.*|ARCH = brick|" Make.brick
+sed -i "s|\$(HOME)/hpl|${BUILD_DIR}/hpl|g" Make.brick
+sed -i "s|^LINKFLAGS\s*=.*|LINKFLAGS = $(echo $CPATH | tr ':' '\n' | grep -v '^$' | sed 's@^@-L@' | tr '\n' ' ')|" Make.brick
+sed -i "s|lblas|lopenblas|" Make.brick
 
-CC=$MPICC make clean arch=brick
 CC=$MPICC make arch=brick

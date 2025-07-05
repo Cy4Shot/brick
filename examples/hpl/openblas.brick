@@ -1,0 +1,7 @@
+@source gh:OpenMathLib/OpenBLAS:8795fc7985635de1ecf674b87e2008a15097ffab
+
+mkdir -p build
+cd build
+SCOREP_WRAPPER=off cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OPENBLAS_INSTALL_DIR
+cmake --build . --config Release --parallel $NUM_THREADS
+cmake --install . --config Release --prefix $OPENBLAS_INSTALL_DIR
