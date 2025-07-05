@@ -2,6 +2,7 @@ package brick
 
 import brick.conc.{BrickConcretizer, Bricks}
 import brick.gen.impl.{BricksGenerator, ConfigGenerator, MainGenerator, UtilsGenerator}
+import brick.link.ModuleSystem
 import brick.log.*
 import brick.util.{ArgParser, BrickCommand}
 
@@ -76,6 +77,11 @@ object BrickCompiler {
             context.logInfo(
               s"Compiling ${bricks.name} with ${bricks.bricks.size} bricks to $outputDir"
             )
+            if (!ModuleSystem.hasModuleSystem) {
+              context.logWarn(
+                "No module system detected. Some features may not work as expected."
+              )
+            }
             ConfigGenerator("test").generateToFile(
               s"${bricks.name}/config",
               outputDir

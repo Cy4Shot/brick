@@ -2,29 +2,13 @@
 
 @dep openmpi
 
-# Create the make file:
 echo "Creating make file for HPL..."
-cat > Make.brick <<EOF
-SHELL = /bin/sh
-ARCH = brick
-TOPdir = \${HOME}/hpl
-INCdir = \${TOPdir}/include
-BINdir = \${TOPdir}/bin/\$(ARCH)
-LIBdir = \${TOPdir}/lib/\$(ARCH)
-MPinc =
-MPlib = -lmpi
-LAinc =
-LAlib = -lopenblas
-HPL_OPTS = -DHPL_CALL_CBLAS
-CC = \${CC}
-CCFLAGS = \${HPL_OPTS} \${CFLAGS}
-LINKER = \${CC}
-LINKFLAGS = \${CCFLAGS}
-ARCHIVER = ar
-ARFLAGS = r
-RANLIB = ranlib
-EOF
+cd setup || exit
+sh make_generic
+cp Make.UNKNOWN ../Make.brick
+cd ..
 
-CC=$MPICC make \
-  arch=brick \
-  -j $NUM_THREADS
+sed -i "s|^ARCH\s*=.*|ARCH = brick|" Make.brick
+
+CC=$MPICC make clean arch=brick
+CC=$MPICC make arch=brick
