@@ -1,6 +1,7 @@
 @source url:https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz
 
 @dep openblas
+@dep openmpi
 
 echo "Creating make file for HPL..."
 cd setup || exit
@@ -14,3 +15,4 @@ sed -i "s|^LINKFLAGS\s*=.*|LINKFLAGS = $(echo $CPATH | tr ':' '\n' | grep -v '^$
 sed -i "s|lblas|lopenblas|" Make.brick
 
 CC=$MPICC make arch=brick
+cp -r $HPL_BUILD_DIR/bin $HPL_INSTALL_DIR/bin
