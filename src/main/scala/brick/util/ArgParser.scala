@@ -110,13 +110,8 @@ object ArgParser {
     var i = 1
     var path: Option[String] = None
     var outputDir: Option[String] = None
-    var showHelp = false
     val flags = scala.collection.mutable.Map[BrickOption, String]()
-
-    // Check for help flag early
-    if (args.contains("-h") || args.contains("--help")) {
-      showHelp = true
-    }
+    var showHelp = args.contains("-h") || args.contains("--help")
 
     // Parse positional argument (path) only if not showing help
     if (!showHelp && i < args.length && !args(i).startsWith("-")) {

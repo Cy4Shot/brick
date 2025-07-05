@@ -2,6 +2,7 @@ package brick.gen.impl
 
 import brick.conc.Bricks
 import brick.gen.*
+import brick.link.ModuleSystem
 import brick.log.LoggingCtx
 import brick.parse.BrickAST.{GitSource, GithubSource, UrlSource}
 import brick.util.IndentedStringBuilder
@@ -22,7 +23,9 @@ class MainGenerator(val bricks: Bricks)(implicit ctx: LoggingCtx)
     // TODO: Make this cross platform
     builder.comment("Setting up the environment")
     builder.raw("set -euxo pipefail")
-    builder.raw("module purge")
+    if (ModuleSystem.hasModuleSystem) {
+      builder.raw("module purge")
+    }
     builder.newline()
 
     builder.comment("Loading required modules")
