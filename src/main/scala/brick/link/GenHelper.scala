@@ -1,7 +1,7 @@
 package brick.link
 
-import scala.scalanative.unsafe._
-import scala.scalanative.unsigned._
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
 
 @extern
 object gen {

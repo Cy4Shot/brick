@@ -2,18 +2,19 @@ package brick.parse
 
 
 import parsley.Parsley
+import parsley.token.{Basic, Lexer, Unicode}
 import parsley.token.descriptions.*
 import parsley.token.errors.*
-import parsley.token.Basic
-import parsley.token.Lexer
-import parsley.token.Unicode
+import parsley.token.symbol.ImplicitSymbol
 
 object BrickLexer {
+
+  private val ident = Basic(c => c.toInt > 32 && c.toInt < 127 && c != '@' && c != ':' && c != '/')
   
   private val desc = LexicalDesc.plain.copy(
     nameDesc = NameDesc.plain.copy(
-      identifierStart = Basic(c => c.toInt > 32 && c.toInt < 127 && c != '@' && c != ':' && c != '/'),
-      identifierLetter = Basic(c => c.toInt > 32 && c.toInt < 127 && c != '@' && c != ':' && c != '/'),
+      identifierStart = ident,
+      identifierLetter = ident,
     ),
     spaceDesc = SpaceDesc.plain.copy(
       lineCommentStart = "#",
@@ -47,7 +48,7 @@ object BrickLexer {
         max: BigInt,
         nativeRadix: Int
     ): FilterConfig[BigInt] = new SpecializedMessage[BigInt] {
-      def message(n: BigInt) = Seq(n match {
+      def message(n: BigInt): Seq[String] = Seq(n match {
         case n if n < min => s"literal $n is smaller than min value of $min"
         case n if n > max => s"literal $n is larger than max value of $max"
         case _            => ""
@@ -85,23 +86,23 @@ object BrickLexer {
 
   /** Parses an integer.
     */
-  val integer = lexer.lexeme.integer.decimal32
+  val integer: Parsley[Int] = lexer.lexeme.integer.decimal32
 
   /** Parses a character.
     */
-  val char = lexer.lexeme.character.ascii
+  val char: Parsley[Char] = lexer.lexeme.character.ascii
 
   /** Parses a string.
     */
-  val string = lexer.lexeme.string.ascii
+  val string: Parsley[String] = lexer.lexeme.string.ascii
 
   /** Parses an identifier.
     */
-  val identifier = lexer.lexeme.names.identifier
+  val identifier: Parsley[String] = lexer.lexeme.names.identifier
 
   /** Implicit symbols.
     */
-  val implicits = lexer.lexeme.symbol.implicits
+  val implicits: ImplicitSymbol = lexer.lexeme.symbol.implicits
 
   /** Helper function to expose the fully method of the lexer.
     * @param p

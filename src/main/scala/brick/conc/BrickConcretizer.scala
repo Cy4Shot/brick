@@ -1,15 +1,13 @@
 package brick.conc
 
+import brick.log.LoggingCtx
+import brick.parse.BrickAST.{BasicOpt, Program}
+import brick.parse.{BrickAST, BrickParser}
+import parsley.{Failure, Success}
+
 import java.io.File
 import scala.collection.mutable
-
-import brick.parse.BrickParser
-import brick.parse.BrickAST.Program
-import brick.parse.BrickAST
-import brick.log.LoggingCtx
-
-import parsley.{Success, Failure}
-import brick.parse.BrickAST.BasicOpt
+import scala.util.Using
 
 object BrickConcretizer {
 
@@ -38,14 +36,7 @@ object BrickConcretizer {
     }
 
     log.logInfo(s"Parsing Brick file: ${inputFile.getName}")
-
-    val content =
-      scala.io.Source.fromFile(inputFile).getLines().mkString("\n") + "\n"
-    val res = BrickParser.parseString(content) match {
-      case Failure(msg) =>
-        log.exit(s"Error parsing Brick file:\n$msg")
-      case Success(x) => x
-    }
+    val res = parseBrickFile(inputFile)
 
     log.logInfo(s"Analyzing Brick file: ${inputFile.getName}")
 
@@ -76,7 +67,6 @@ object BrickConcretizer {
       .map(module =>
         s"${module.name}${module.version.map(v => s"/$v").getOrElse("")}"
       )
-      .toList
 
     val packages = res.stmts
       .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
@@ -86,7 +76,7 @@ object BrickConcretizer {
       .filter(_.nonEmpty)
 
     log.logInfo(s"Concretized Brick file: ${inputFile.getName}")
-    log.incrementProgress("parsing", 1)
+    log.incrementProgress("parsing")
 
     BrickTree(
       name = input,
@@ -127,14 +117,7 @@ object BrickConcretizer {
     }
 
     log.logInfo(s"Parsing Brickfile for targets")
-
-    val content =
-      scala.io.Source.fromFile(brickfilePath).getLines().mkString("\n") + "\n"
-    val res = BrickParser.parseString(content) match {
-      case Failure(msg) =>
-        log.exit(s"Error parsing Brickfile:\n$msg")
-      case Success(x) => x
-    }
+    val res = parseBrickFile(brickfilePath)
 
     // Extract targets from the Brickfile
     val targets = res.stmts.collect { case BrickAST.TargetFlag(target) => target }
@@ -151,7 +134,18 @@ object BrickConcretizer {
       log.logInfo(s"Concretizing target: ${target.opt}")
       val tree = _concretize(target.opt, root)
       Bricks(target.opt, flattenToCompilationOrder(tree))
-    }.toList
+    }
+  }
+
+  private def parseBrickFile(inputFile: File): BrickAST = {
+    val content = Using.resource(scala.io.Source.fromFile(inputFile)) { source =>
+      source.getLines().mkString("\n") + "\n"
+    }
+    BrickParser.parseString(content) match {
+      case Failure(msg) =>
+        log.exit(s"Error parsing Brick file:\n$msg")
+      case Success(x) => x
+    }
   }
   
   def concretize(

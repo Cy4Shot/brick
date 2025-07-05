@@ -1,14 +1,14 @@
 package brick.gen
 
-import brick.util.IndentedStringBuilder
 import brick.link.PacmanHelper
+import brick.util.IndentedStringBuilder
 
 abstract class ScriptBuilder {
   val ext: String
   val threads: String
   val unix: Boolean
 
-  val pacman = PacmanHelper.getPackageManager()
+  val pacman: Option[String] = PacmanHelper.getPackageManager()
 
   def comment(text: String)(implicit b: IndentedStringBuilder): Unit
 
@@ -39,21 +39,16 @@ abstract class ScriptBuilder {
   def raw(
       text: String
   )(implicit b: IndentedStringBuilder): Unit = {
-    // Check if this is a heredoc start (cat > file << EOF)
     val heredocPattern = """.*<<\s*(\w+)\s*$""".r
     text match {
       case heredocPattern(eofMarker) =>
-        // This is a heredoc start, append the line normally and mark for unindenting
         b ++= s"$text\n"
         setHeredocMode(eofMarker, b)
       case _ if isInHeredocMode(text) =>
-        // We're in heredoc mode, check if this is the EOF marker
         if (isHeredocEnd(text)) {
-          // This is the EOF marker, append normally and exit heredoc mode
           b.appendRaw(s"$text\n")
           exitHeredocMode(b)
         } else {
-          // This is heredoc content, append without indentation
           b.appendRaw(s"$text\n")
         }
       case _ =>
@@ -67,7 +62,6 @@ abstract class ScriptBuilder {
 
   private def setHeredocMode(marker: String, b: IndentedStringBuilder): Unit = {
     heredocMarker = Some(marker)
-    // Save current indent and temporarily disable it
     savedIndent = b.getCurrentIndent
     b.setIndent("")
   }
@@ -75,7 +69,7 @@ abstract class ScriptBuilder {
   private def isInHeredocMode(text: String): Boolean = heredocMarker.isDefined
 
   private def isHeredocEnd(text: String): Boolean = {
-    heredocMarker.exists(marker => text.trim == marker)
+    heredocMarker.contains(text.trim)
   }
 
   private def exitHeredocMode(b: IndentedStringBuilder): Unit = {

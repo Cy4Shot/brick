@@ -1,25 +1,24 @@
 package brick.gen.impl
 
-import brick.gen._
+import brick.gen.*
 import brick.log.LoggingCtx
-import brick.util.NVHPCConfig
-import brick.util.IndentedStringBuilder
+import brick.util.{IndentedStringBuilder, NVHPCConfig}
 
 class ConfigGenerator(
-    val name: String,
-    val threadOverride: Int = 0,
-    val rootDirectory: String = "brick",
-    val tmpDirectory: String = "tmp",
-    val buildDirectory: String = "build",
-    val installDirectory: String = "install",
-    val cc: String = "gcc",
-    val cxx: String = "g++",
-    var fc: String = "gfortran",
-    val mpicc: String = "mpicc",
-    val mpicxx: String = "mpicxx",
-    val mpifc: String = "mpif90",
-    val flags: String = "",
-    val nvhpc: Option[NVHPCConfig] = None
+                       val name: String,
+                       val threadOverride: Int = 0,
+                       val rootDirectory: String = "brick",
+                       val tmpDirectory: String = "tmp",
+                       val buildDirectory: String = "build",
+                       val installDirectory: String = "install",
+                       val cc: String = "gcc",
+                       val cxx: String = "g++",
+                       var fc: String = "gfortran",
+                       val mpicc: String = "mpicc",
+                       val mpicxx: String = "mpicxx",
+                       val mpifc: String = "mpif90",
+                       val flags: String = "",
+                       val nvhpc: Option[NVHPCConfig] = None
 )(implicit ctx: LoggingCtx)
     extends Generator {
 
@@ -61,7 +60,7 @@ class ConfigGenerator(
 
     builder.comment("Directory Config")
     // TODO: Make this cross-platform
-    builder.raw(s"export BRICKS_ROOT_DIR=$$(readlink -f ./${rootDirectory})")
+    builder.raw(s"export BRICKS_ROOT_DIR=$$(readlink -f ./$rootDirectory)")
     builder.set("TMP_DIR", "${BRICKS_ROOT_DIR}/" + tmpDirectory)
     builder.set("BUILD_DIR", "${BRICKS_ROOT_DIR}/" + buildDirectory)
     builder.set("INSTALL_DIR", "${BRICKS_ROOT_DIR}/" + installDirectory)

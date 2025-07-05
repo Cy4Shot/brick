@@ -1,8 +1,9 @@
 package brick.gen
 
-import java.io.{File, PrintWriter}
 import brick.log.LoggingCtx
 import brick.util.Platform
+
+import java.io.{File, PrintWriter}
 
 abstract class Generator {
   def generate()(implicit builder: ScriptBuilder): String
@@ -10,10 +11,11 @@ abstract class Generator {
   def validate()(implicit builder: ScriptBuilder): Unit
 
   def generateToFile(filePath: String): Unit = {
-    given builder: ScriptBuilder = Platform.isWindows match {
-      case true  => new BashScriptBuilder()
-      case false => new BashScriptBuilder()
-    }
+    // TODO: Windows support
+    given builder: ScriptBuilder = if Platform.isWindows then
+      new BashScriptBuilder()
+    else
+      new BashScriptBuilder()
 
     validate()
     val content = generate()

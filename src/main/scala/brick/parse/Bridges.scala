@@ -1,8 +1,10 @@
 package brick.parse
 
 import parsley.Parsley
+import parsley.ap.*
 import parsley.position.pos
-import parsley.ap._
+
+import scala.annotation.targetName
 
 object Bridges {
 
@@ -18,12 +20,14 @@ object Bridges {
     def apply(): R = apply((0, 0))
 
     /** Creates a parser that applies this bridge at the current position.
+ *
       * @param op
       *   The parser to apply.
       * @return
       *   The resulting parser.
-      */
-    final def <#(op: Parsley[Any]): Parsley[R] = pos.map(this.apply(_)) <~ op
+     */
+    @targetName("from")
+    final def <#(op: Parsley[Any]): Parsley[R] = pos.map(this.apply) <~ op
   }
 
   /** A parser bridge for a parser with one parameter.
@@ -45,7 +49,9 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    def from(op: Parsley[Any]): Parsley[T1 => R] = pos.map(con) <~ op
+    private def from(op: Parsley[Any]): Parsley[T1 => R] = pos.map(con) <~ op
+
+    @targetName("from")
     final def <#(op: Parsley[Any]): Parsley[T1 => R] = this `from` op
   }
 
@@ -71,7 +77,9 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    def from(op: Parsley[Any]): Parsley[(T1, T2) => R] = pos.map(con) <~ op
+    private def from(op: Parsley[Any]): Parsley[(T1, T2) => R] = pos.map(con) <~ op
+
+    @targetName("from")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2) => R] = this `from` op
   }
 
@@ -99,7 +107,9 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    def from(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] = pos.map(con) <~ op
+    private def from(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] = pos.map(con) <~ op
+
+    @targetName("from")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] = this `from` op
   }
 
@@ -134,8 +144,10 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    def from(op: Parsley[Any]): Parsley[(T1, T2, T3, T4) => R] =
+    private def from(op: Parsley[Any]): Parsley[(T1, T2, T3, T4) => R] =
       pos.map(con) <~ op
+
+    @targetName("from")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2, T3, T4) => R] =
       this `from` op
   }

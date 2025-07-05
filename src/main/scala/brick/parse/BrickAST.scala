@@ -1,7 +1,7 @@
 package brick.parse
 
-import parsley.generic._
-import brick.parse.Bridges._
+import brick.parse.Bridges.*
+import parsley.generic.*
 
 object BrickAST {
 

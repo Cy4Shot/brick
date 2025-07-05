@@ -1,9 +1,9 @@
 package brick.gen.impl
 
-import brick.gen._
-import brick.log.LoggingCtx
 import brick.conc.Bricks
-import brick.parse.BrickAST.{GitSource, UrlSource, GithubSource}
+import brick.gen.*
+import brick.log.LoggingCtx
+import brick.parse.BrickAST.{GitSource, GithubSource, UrlSource}
 import brick.util.IndentedStringBuilder
 
 class MainGenerator(val bricks: Bricks)(implicit ctx: LoggingCtx)

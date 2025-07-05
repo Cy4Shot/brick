@@ -1,7 +1,7 @@
 package brick.link
 
-import scala.scalanative.unsafe._
-import scala.scalanative.unsigned._
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
 
 @extern
 object term {
@@ -11,15 +11,15 @@ object term {
 }
 
 object TerminalSize {
-  import term._
-  def getTerminalSize(): Option[(Int, Int)] = {
+  import term.*
+  def getTerminalSize: Option[(Int, Int)] = {
     try {
       Zone {
         val rows = alloc[CInt]()
         val cols = alloc[CInt]()
 
         if (get_terminal_size(rows, cols) == 0) {
-          Some((!rows).toInt, (!cols).toInt)
+          Some(!rows, !cols)
         } else {
           None
         }
@@ -29,17 +29,17 @@ object TerminalSize {
     }
   }
 
-  def getTerminalWidth(): Int = {
+  def getTerminalWidth: Int = {
     try {
-      get_terminal_width().toInt
+      get_terminal_width()
     } catch {
       case _: Exception => 80
     }
   }
 
-  def getTerminalHeight(): Int = {
+  def getTerminalHeight: Int = {
     try {
-      get_terminal_height().toInt
+      get_terminal_height()
     } catch {
       case _: Exception => 24
     }

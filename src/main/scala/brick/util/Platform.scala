@@ -1,6 +1,6 @@
 package brick.util
 
-import scala.scalanative.runtime.{Platform => NativePlatform}
+import scala.scalanative.runtime.Platform as NativePlatform
 
 object Platform {
   def isWindows: Boolean = NativePlatform.isWindows()

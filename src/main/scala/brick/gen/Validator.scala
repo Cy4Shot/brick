@@ -1,6 +1,6 @@
 package brick.gen
 
-import brick.log._
+import brick.log.*
 
 object Validator {
   def checkExecutable(

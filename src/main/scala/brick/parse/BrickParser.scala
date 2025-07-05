@@ -1,15 +1,14 @@
 package brick.parse
 
-import brick.parse.BrickLexer._
+import brick.parse.BrickAST.*
+import brick.parse.BrickLexer.*
 import brick.parse.BrickLexer.implicits.implicitSymbol
-import brick.parse.BrickAST._
-
-import parsley.Parsley
-import parsley.quick._
-import parsley.errors.combinator._
+import parsley.errors.combinator.*
+import parsley.quick.*
+import parsley.{Parsley, Result}
 
 object BrickParser {
-  def parseString(input: String) =
+  def parseString(input: String): Result[String, Program] =
     parser.parse(input)
 
   private lazy val parser = fully(program)
@@ -35,7 +34,7 @@ object BrickParser {
     ModuleOpt(identifier, option(version))
 
   private lazy val envOpt: Parsley[EnvOpt] =
-    EnvOpt(identifier <~ ":" , path)
+    EnvOpt(identifier <~ ":", path)
 
   private lazy val sourceOpt: Parsley[SourceOpt] =
     SourceOpt(source <~ ":", sepBy(path, ":"))
@@ -49,13 +48,22 @@ object BrickParser {
       GithubSource <# "gh"
 
   private lazy val commandStmt: Parsley[CommandStmt] =
-    CommandStmt(manyTill(
-      satisfy(c => c.toInt >= 32 && c != '\n' && c != '\r' && c != '\\') | ("\\" ~> endOfLine).as(' '),
-    endOfLine).map(_.mkString.replaceAll("\\s{2,}", " ")))
+    CommandStmt(
+      manyTill(
+        atomic("\\" ~> endOfLine).as(' ') | satisfy(c =>
+          c.toInt >= 32 && c != '\n' && c != '\r'
+        ),
+        endOfLine
+      ).map(_.mkString.replaceAll("\\s{2,}", " "))
+    )
 
   private lazy val version: Parsley[String] =
     "/" ~> identifier
 
   private lazy val path: Parsley[String] =
-    many(satisfy(c => c.toInt >= 33 && c.toInt < 127 && !c.isWhitespace && c != ':')).map(_.mkString)
+    many(
+      satisfy(c =>
+        c.toInt >= 33 && c.toInt < 127 && !c.isWhitespace && c != ':'
+      )
+    ).map(_.mkString)
 }

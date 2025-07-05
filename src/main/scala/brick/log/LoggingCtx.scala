@@ -1,17 +1,17 @@
 package brick.log
 
-import scala.collection.mutable
-import scala.concurrent.{Future, ExecutionContext}
-import scala.concurrent.duration._
-import java.util.concurrent.{Executors, ScheduledExecutorService}
+import fansi.{Color, Str}
+
 import java.util.concurrent.atomic.AtomicBoolean
-import scala.Console.{print => cprint}
-import fansi.Str
-import fansi.Color
+import java.util.concurrent.{Executors, ScheduledExecutorService}
+import scala.Console.print as cprint
+import scala.collection.mutable
+import scala.concurrent.duration.*
+import scala.concurrent.{ExecutionContext, Future}
 
 class LoggingCtx(title: String, maxLogLines: Int = 12, maxProgressLines: Int = 5) {
-  private var progressBars = mutable.LinkedHashMap.empty[String, ProgressBar]
-  private var logs = mutable.Buffer.empty[String]
+  private val progressBars = mutable.LinkedHashMap.empty[String, ProgressBar]
+  private val logs = mutable.Buffer.empty[String]
   private var lastLineCount = 0
 
   def addProgressBar(name: String, label: String, max: Long = 100): Unit = {
@@ -19,32 +19,27 @@ class LoggingCtx(title: String, maxLogLines: Int = 12, maxProgressLines: Int = 5
     render()
   }
 
-  def updateProgress(name: String, current: Long): Unit = {
-    progressBars.get(name).foreach { bar =>
-      progressBars(name) = bar.copy(current = current)
-    }
+  private def updateBar(name: String, f: ProgressBar => ProgressBar): Unit = {
+    progressBars.get(name).foreach(bar => {
+        progressBars(name) = f(bar)
+    })
     render()
+  }
+
+  def updateProgress(name: String, current: Long): Unit = {
+    updateBar(name, _.copy(current = current))
   }
 
   def setProgressMax(name: String, max: Long): Unit = {
-    progressBars.get(name).foreach { bar =>
-      progressBars(name) = bar.copy(max = max)
-    }
-    render()
+    updateBar(name, _.copy(max = max))
   }
 
   def incrementProgress(name: String, amount: Long = 1): Unit = {
-    progressBars.get(name).foreach { bar =>
-      progressBars(name) = bar.copy(current = bar.current + amount)
-    }
-    render()
+    updateBar(name, _.copy(current = _.current + amount))
   }
 
   def incrementProgressMax(name: String, amount: Long): Unit = {
-    progressBars.get(name).foreach { bar =>
-      progressBars(name) = bar.copy(max = bar.max + amount)
-    }
-    render()
+    updateBar(name, _.copy(max = _.max + amount))
   }
 
   def log(message: String): Unit = {

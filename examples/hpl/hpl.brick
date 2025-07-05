@@ -4,29 +4,27 @@
 
 # Create the make file:
 echo "Creating make file for HPL..."
-cat > setup/Make.brick << EOF
-SHELL     = /bin/sh
-ARCH      = brick
-TOPdir       = $(HOME)/hpl
-INCdir       = $(TOPdir)/include
-BINdir       = $(TOPdir)/bin/$(ARCH)
-LIBdir       = $(TOPdir)/lib/$(ARCH)
-
-MPinc     = 
-MPlib     = -lmpi
-
-LAinc     =
-LAlib     = -lopenblas
-
-HPL_OPTS  = -DHPL_CALL_CBLAS
-
-CC        = $(CC)
-CCFLAGS   = $(HPL_OPTS) $(CFLAGS)
-LINKER    = $(CC)
-LINKFLAGS = $(CCFLAGS)
-ARCHIVER  = ar
-ARFLAGS   = r
-RANLIB    = ranlib
+cat > Make.brick <<EOF
+SHELL = /bin/sh
+ARCH = brick
+TOPdir = \${HOME}/hpl
+INCdir = \${TOPdir}/include
+BINdir = \${TOPdir}/bin/\$(ARCH)
+LIBdir = \${TOPdir}/lib/\$(ARCH)
+MPinc =
+MPlib = -lmpi
+LAinc =
+LAlib = -lopenblas
+HPL_OPTS = -DHPL_CALL_CBLAS
+CC = \${CC}
+CCFLAGS = \${HPL_OPTS} \${CFLAGS}
+LINKER = \${CC}
+LINKFLAGS = \${CCFLAGS}
+ARCHIVER = ar
+ARFLAGS = r
+RANLIB = ranlib
 EOF
 
-CC=$MPICC make arch=brick -j $NUM_THREADS
+CC=$MPICC make \
+  arch=brick \
+  -j $NUM_THREADS

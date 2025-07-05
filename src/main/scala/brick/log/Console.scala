@@ -1,12 +1,11 @@
 package brick.log
 
-import fansi._
-import scala.concurrent.duration._
-import scala.util.Random
-import scala.Console.{print => cprint}
+import fansi.*
 
-import scala.sys.process._
-import scala.util.Try
+import scala.Console.print as cprint
+import scala.concurrent.duration.*
+import scala.sys.process.*
+import scala.util.{Random, Try}
 
 case class ProgressBar(label: String, current: Long, max: Long) {
   def percent: Double =
@@ -54,6 +53,11 @@ case class RichConsoleBoxWithLog(
     content + " " * paddingNeeded
   }
 
+  private def boxWrap(lines: Seq[String]): Seq[String] =
+    lines.map { line =>
+      s"$vertical${padToWidth(line, innerWidth)}$vertical"
+    }
+
   def render(): (String, Int) = {
     System.setProperty("org.jline.utils.Log", "OFF")
     val terminalWidth = brick.link.TerminalSize.getTerminalWidth()
@@ -90,18 +94,14 @@ case class RichConsoleBoxWithLog(
       s"$vertical ${padToWidth(titleContent, innerWidth - 1)}$vertical"
     val midSep = s"$vertical${horizontal * (boxWidth - 2)}$vertical"
 
-    val logBodyLines = logLines.map { line =>
-      s"$vertical${padToWidth(line, innerWidth)}$vertical"
-    }
+    val logBodyLines = boxWrap(logLines)
 
     val logSep =
       if (logLines.nonEmpty)
         Seq(s"$vertical${horizontal * (boxWidth - 2)}$vertical")
       else Seq.empty
 
-    val progressBodyLines = contentLines.map { line =>
-      s"$vertical${padToWidth(line, innerWidth)}$vertical"
-    }
+    val progressBodyLines = boxWrap(contentLines)
 
     val bottom = s"$bottomLeft${horizontal * (boxWidth - 2)}$bottomRight"
 
@@ -117,4 +117,8 @@ case class RichConsoleBoxWithLog(
       maxLines
     )
   }
+}
+
+def printError(msg: String): Unit = {
+  println(fansi.Color.Red("Error: ") ++ fansi.Color.Yellow(msg))
 }

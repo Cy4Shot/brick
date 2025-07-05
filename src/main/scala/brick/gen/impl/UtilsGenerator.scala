@@ -1,9 +1,9 @@
 package brick.gen.impl
 
-import scala.collection.mutable
-
-import brick.gen._
+import brick.gen.*
 import brick.log.LoggingCtx
+
+import scala.collection.mutable
 
 val utilsWin =
 """
@@ -385,8 +385,8 @@ class UtilsGenerator()(implicit ctx: LoggingCtx) extends Generator {
   def validate()(implicit builder: ScriptBuilder): Unit = {}
 
   def generate()(implicit builder: ScriptBuilder): String =
-    builder.unix match {
-      case true  => utilsUnix
-      case false => utilsWin
-    }
+    if builder.unix then
+      utilsUnix
+    else
+      utilsWin
 }

@@ -1,5 +1,6 @@
 package brick.util
 
+import scala.annotation.targetName
 import scala.collection.mutable
 
 class IndentedStringBuilder(indentStep: String = "  ") {
@@ -50,6 +51,7 @@ class IndentedStringBuilder(indentStep: String = "  ") {
     this
   }
 
+  @targetName("appendText")
   def ++=(text: String): this.type = append(text)
 
   def mkString: String = sb.mkString
