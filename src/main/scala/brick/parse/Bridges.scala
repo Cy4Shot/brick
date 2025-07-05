@@ -20,13 +20,13 @@ object Bridges {
     def apply(): R = apply((0, 0))
 
     /** Creates a parser that applies this bridge at the current position.
- *
+      *
       * @param op
       *   The parser to apply.
       * @return
       *   The resulting parser.
-     */
-    @targetName("from")
+      */
+    @targetName("fromInline")
     final def <#(op: Parsley[Any]): Parsley[R] = pos.map(this.apply) <~ op
   }
 
@@ -51,7 +51,7 @@ object Bridges {
       */
     private def from(op: Parsley[Any]): Parsley[T1 => R] = pos.map(con) <~ op
 
-    @targetName("from")
+    @targetName("fromInline")
     final def <#(op: Parsley[Any]): Parsley[T1 => R] = this `from` op
   }
 
@@ -77,9 +77,10 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    private def from(op: Parsley[Any]): Parsley[(T1, T2) => R] = pos.map(con) <~ op
+    private def from(op: Parsley[Any]): Parsley[(T1, T2) => R] =
+      pos.map(con) <~ op
 
-    @targetName("from")
+    @targetName("fromInline")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2) => R] = this `from` op
   }
 
@@ -107,9 +108,10 @@ object Bridges {
       * @return
       *   The resulting parser.
       */
-    private def from(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] = pos.map(con) <~ op
+    private def from(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] =
+      pos.map(con) <~ op
 
-    @targetName("from")
+    @targetName("fromInline")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2, T3) => R] = this `from` op
   }
 
@@ -147,9 +149,8 @@ object Bridges {
     private def from(op: Parsley[Any]): Parsley[(T1, T2, T3, T4) => R] =
       pos.map(con) <~ op
 
-    @targetName("from")
+    @targetName("fromInline")
     final def <#(op: Parsley[Any]): Parsley[(T1, T2, T3, T4) => R] =
       this `from` op
   }
 }
-

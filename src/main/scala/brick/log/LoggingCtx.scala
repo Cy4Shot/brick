@@ -35,11 +35,11 @@ class LoggingCtx(title: String, maxLogLines: Int = 12, maxProgressLines: Int = 5
   }
 
   def incrementProgress(name: String, amount: Long = 1): Unit = {
-    updateBar(name, _.copy(current = _.current + amount))
+    updateBar(name, b => b.copy(current = b.current + amount))
   }
 
   def incrementProgressMax(name: String, amount: Long): Unit = {
-    updateBar(name, _.copy(max = _.max + amount))
+    updateBar(name, b => b.copy(max = b.max + amount))
   }
 
   def log(message: String): Unit = {

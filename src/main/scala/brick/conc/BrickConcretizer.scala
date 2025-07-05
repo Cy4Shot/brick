@@ -70,7 +70,7 @@ object BrickConcretizer {
 
     val packages = res.stmts
       .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
-      
+
     val commands = res.stmts
       .collect { case BrickAST.CommandStmt(command) => command }
       .filter(_.nonEmpty)
@@ -88,7 +88,7 @@ object BrickConcretizer {
         envs = envs,
         modules = modules,
         commands = commands,
-        packages =  packages
+        packages = packages
       )
     )
   }
@@ -109,9 +109,11 @@ object BrickConcretizer {
     result.toList
   }
 
-  private def concretizeTargets(root: String)(using log: LoggingCtx): List[Bricks] = {
+  private def concretizeTargets(
+      root: String
+  )(using log: LoggingCtx): List[Bricks] = {
     val brickfilePath = new File(root, "Brickfile")
-    
+
     if (!brickfilePath.exists()) {
       log.exit(s"Brickfile does not exist in $root.")
     }
@@ -120,8 +122,10 @@ object BrickConcretizer {
     val res = parseBrickFile(brickfilePath)
 
     // Extract targets from the Brickfile
-    val targets = res.stmts.collect { case BrickAST.TargetFlag(target) => target }
-    
+    val targets = res.stmts.collect { case BrickAST.TargetFlag(target) =>
+      target
+    }
+
     if (targets.isEmpty) {
       log.exit("No targets specified in Brickfile.")
     }
@@ -137,9 +141,12 @@ object BrickConcretizer {
     }
   }
 
-  private def parseBrickFile(inputFile: File): BrickAST = {
-    val content = Using.resource(scala.io.Source.fromFile(inputFile)) { source =>
-      source.getLines().mkString("\n") + "\n"
+  private def parseBrickFile(
+      inputFile: File
+  )(using log: LoggingCtx): Program = {
+    val content = Using.resource(scala.io.Source.fromFile(inputFile)) {
+      source =>
+        source.getLines().mkString("\n") + "\n"
     }
     BrickParser.parseString(content) match {
       case Failure(msg) =>
@@ -147,11 +154,11 @@ object BrickConcretizer {
       case Success(x) => x
     }
   }
-  
+
   def concretize(
       root: String,
       input: Option[String] = None
   )(using log: LoggingCtx): List[Bricks] = {
-      concretizeTargets(root)
+    concretizeTargets(root)
   }
 }

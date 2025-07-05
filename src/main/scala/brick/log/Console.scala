@@ -53,14 +53,14 @@ case class RichConsoleBoxWithLog(
     content + " " * paddingNeeded
   }
 
-  private def boxWrap(lines: Seq[String]): Seq[String] =
+  private def boxWrap(lines: Seq[String], innerWidth: Int): Seq[String] =
     lines.map { line =>
       s"$vertical${padToWidth(line, innerWidth)}$vertical"
     }
 
   def render(): (String, Int) = {
     System.setProperty("org.jline.utils.Log", "OFF")
-    val terminalWidth = brick.link.TerminalSize.getTerminalWidth()
+    val terminalWidth = brick.link.TerminalSize.getTerminalWidth
     val boxWidth = terminalWidth - 2
     val innerWidth = boxWidth - 2
 
@@ -94,14 +94,14 @@ case class RichConsoleBoxWithLog(
       s"$vertical ${padToWidth(titleContent, innerWidth - 1)}$vertical"
     val midSep = s"$vertical${horizontal * (boxWidth - 2)}$vertical"
 
-    val logBodyLines = boxWrap(logLines)
+    val logBodyLines = boxWrap(logLines, innerWidth)
 
     val logSep =
       if (logLines.nonEmpty)
         Seq(s"$vertical${horizontal * (boxWidth - 2)}$vertical")
       else Seq.empty
 
-    val progressBodyLines = boxWrap(contentLines)
+    val progressBodyLines = boxWrap(contentLines, innerWidth)
 
     val bottom = s"$bottomLeft${horizontal * (boxWidth - 2)}$bottomRight"
 

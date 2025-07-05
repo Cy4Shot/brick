@@ -8,7 +8,7 @@ abstract class ScriptBuilder {
   val threads: String
   val unix: Boolean
 
-  val pacman: Option[String] = PacmanHelper.getPackageManager()
+  val pacman: Option[String] = PacmanHelper.getPackageManager
 
   def comment(text: String)(implicit b: IndentedStringBuilder): Unit
 
