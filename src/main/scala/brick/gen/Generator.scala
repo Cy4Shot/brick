@@ -10,16 +10,15 @@ abstract class Generator {
 
   def validate()(implicit builder: ScriptBuilder): Unit
 
-  def generateToFile(filePath: String): Unit = {
+  def generateToFile(filePath: String, outputDir: String = "."): Unit = {
     // TODO: Windows support
     given builder: ScriptBuilder = if Platform.isWindows then
       new BashScriptBuilder()
-    else
-      new BashScriptBuilder()
+    else new BashScriptBuilder()
 
     validate()
     val content = generate()
-    val file = new File("generated/" + filePath + builder.ext)
+    val file = new File(s"$outputDir/$filePath${builder.ext}")
     file.getParentFile.mkdirs()
     val writer = new PrintWriter(file)
     try {
