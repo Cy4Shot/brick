@@ -26,9 +26,9 @@ enum BrickCommand(
         "Path to the brick project or .brick file to compile",
         List(BrickOption.Help, BrickOption.Output),
         List(
-          "brick gen examples/hpl                    Generate in current directory",
-          "brick gen examples/hpl -o ./build         Generate in './build' directory",
-          "brick gen my-app.brick --output /tmp/out   Generate in '/tmp/out' directory"
+          "brick gen examples/hpl                     Generate in current directory",
+          "brick gen examples/hpl -o ./build          Generate in './build' directory",
+          "brick gen examples/hpl --output /tmp/out   Generate in '/tmp/out' directory"
         )
       )
   case Help
@@ -38,6 +38,18 @@ enum BrickCommand(
         "",
         List.empty,
         List.empty
+      )
+  case Run
+      extends BrickCommand(
+        "run",
+        "Compile & run a brick project",
+        "Path to the brick project or .brick file to run",
+        List(BrickOption.Help, BrickOption.Output),
+        List(
+          "brick run examples/hpl                      Run the HPL example",
+          "brick run my-app.brick -o ./output          Run with output in './output' directory",
+          "brick run my-app.brick --output /tmp/run    Run with output in '/tmp/run' directory"
+        )
       )
 
   def usage: String = s"brick $value <path> [OPTIONS]"
@@ -244,6 +256,10 @@ object ArgParser {
         sb.append("    - Utility functions\n")
         sb.append("    - Package-specific scripts\n")
         sb.append("    - Main execution script\n\n")
+      case BrickCommand.Run =>
+        sb.append(
+          "    Compiles and runs a brick project, executing the main script.\n"
+        )
       case BrickCommand.Help =>
         sb.append("    Shows help information for brick commands.\n\n")
     }

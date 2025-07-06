@@ -5,6 +5,7 @@ import brick.gen.impl.{BricksGenerator, ConfigGenerator, MainGenerator, UtilsGen
 import brick.link.ModuleSystem
 import brick.log.*
 import brick.util.{ArgParser, BrickCommand}
+import os.*
 
 import java.nio.file.{Files, Path, Paths}
 
@@ -49,7 +50,7 @@ object BrickCompiler {
           case e: Exception =>
             printError(s"Failed to initialize: ${e.getMessage}")
         }
-      case BrickCommand.Gen =>
+      case BrickCommand.Gen | BrickCommand.Run =>
         val pathStr = parsedArgs.path.get
         val outputDir = parsedArgs.outputDir.getOrElse(".")
         val taskToRun = Paths.get(pathStr).getFileName.toString
@@ -94,10 +95,20 @@ object BrickCompiler {
                 outputDir
               )
             }
-            MainGenerator(bricks).generateToFile(
+            val path = MainGenerator(bricks).generateToFile(
               s"${bricks.name}/main",
               outputDir
             )
+
+            if (parsedArgs.command == BrickCommand.Run) {
+              os.call(
+                cmd = "sh main.sh",
+                cwd = os.Path(path, os.pwd) / os.up,
+                stdin = os.Inherit,
+                stdout = os.Inherit,
+                stderr = os.Inherit
+              )
+            }
           }
         } catch {
           case e: Exception =>

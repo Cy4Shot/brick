@@ -10,7 +10,7 @@ abstract class Generator {
 
   def validate()(implicit builder: ScriptBuilder): Unit
 
-  def generateToFile(filePath: String, outputDir: String = "."): Unit = {
+  def generateToFile(filePath: String, outputDir: String = "."): String = {
     // TODO: Windows support
     given builder: ScriptBuilder = if Platform.isWindows then
       new BashScriptBuilder()
@@ -26,5 +26,6 @@ abstract class Generator {
     } finally {
       writer.close()
     }
+    file.getPath
   }
 }
