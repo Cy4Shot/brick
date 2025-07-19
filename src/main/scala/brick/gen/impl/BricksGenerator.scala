@@ -66,7 +66,7 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
       builder.call("pushd", s"$$${NAME}_BUILD_DIR")
       builder.call(name + "_conf")
 
-      brick.commands.foreach(builder.raw)
+      brick.commands.foreach(builder.rawTemplated)
 
       builder.call("popd")
       builder.call("touch", s"$$TMP_DIR/$name.flag")

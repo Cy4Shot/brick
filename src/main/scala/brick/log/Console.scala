@@ -36,86 +36,46 @@ case class RichConsoleBoxWithLog(
     maxLogLines: Int = 5,
     maxLines: Int = 10
 ) {
-  private val topLeft = "╭"
-  private val topRight = "╮"
-  private val bottomLeft = "╰"
-  private val bottomRight = "╯"
-  private val horizontal = "─"
-  private val vertical = "│"
-
   private def getVisibleLength(str: String): Int = {
     str.replaceAll("\u001B\\[[;\\d]*m", "").length
   }
 
-  private def padToWidth(content: String, targetWidth: Int): String = {
-    val visibleLength = getVisibleLength(content)
-    val paddingNeeded = math.max(0, targetWidth - visibleLength)
-    content + " " * paddingNeeded
-  }
-
-  private def boxWrap(lines: Seq[String], innerWidth: Int): Seq[String] =
-    lines.map { line =>
-      s"$vertical${padToWidth(line, innerWidth)}$vertical"
-    }
-
   def render(): (String, Int) = {
     System.setProperty("org.jline.utils.Log", "OFF")
     val terminalWidth = brick.link.TerminalSize.getTerminalWidth
-    val boxWidth = terminalWidth - 2
-    val innerWidth = boxWidth - 2
 
     val truncatedTitle =
-      if (title.length > innerWidth - 1) title.take(innerWidth - 4) + "..."
+      if (title.length > terminalWidth - 1) title.take(terminalWidth - 4) + "..."
       else title
 
     val logLines = logs.takeRight(maxLogLines).map { log =>
-      if (getVisibleLength(log) > innerWidth) {
-        log.take(innerWidth - 3) + "..."
+      if (getVisibleLength(log) > terminalWidth) {
+        log.take(terminalWidth - 3) + "..."
       } else log
     }
 
     val contentLines = bars.takeRight(maxLines).map { bar =>
-      val rendered = bar.render(maxWidth = innerWidth)
-      if (getVisibleLength(rendered) > innerWidth) {
-        val truncated = rendered.take(innerWidth - 3) + "..."
+      val rendered = bar.render(maxWidth = terminalWidth)
+      if (getVisibleLength(rendered) > terminalWidth) {
+        val truncated = rendered.take(terminalWidth - 3) + "..."
         if (
           truncated.contains("\u001B") && !truncated
             .matches(".*\u001B\\[[;\\d]*m")
         ) {
-          rendered.take(innerWidth)
+          rendered.take(terminalWidth)
         } else truncated
       } else rendered
     }
 
-    val top = s"$topLeft${horizontal * (boxWidth - 2)}$topRight"
     val titleContent =
       Str(truncatedTitle).overlay(Bold.On, 0, truncatedTitle.length).render
-    val titleLine =
-      s"$vertical ${padToWidth(titleContent, innerWidth - 1)}$vertical"
-    val midSep = s"$vertical${horizontal * (boxWidth - 2)}$vertical"
 
-    val logBodyLines = boxWrap(logLines, innerWidth)
-
-    val logSep =
-      if (logLines.nonEmpty)
-        Seq(s"$vertical${horizontal * (boxWidth - 2)}$vertical")
-      else Seq.empty
-
-    val progressBodyLines = boxWrap(contentLines, innerWidth)
-
-    val bottom = s"$bottomLeft${horizontal * (boxWidth - 2)}$bottomRight"
-
-    val allLines =
-      top +: titleLine +: midSep +: (logBodyLines ++ logSep ++ progressBodyLines) :+ bottom
+    val allLines = titleContent +: (logLines ++ contentLines)
     (allLines.mkString("\n"), allLines.length)
   }
 
   def lineCount: Int = {
-    val logSepCount = if (logs.nonEmpty) 1 else 0
-    3 + math.min(logs.length, maxLogLines) + logSepCount + math.min(
-      bars.length,
-      maxLines
-    )
+    1 + math.min(logs.length, maxLogLines) + math.min(bars.length, maxLines)
   }
 }
 

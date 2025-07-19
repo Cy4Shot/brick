@@ -1,0 +1,3 @@
+@source gh:rtyley/small-test-repo:916f7dbaa50350fc9c510beba3111af9e318ed8a
+
+echo "I am on OS: {{ sys.os }}, ARCH: {{ sys.arch }}, NODE: {{ sys.node }}, KERNEL: {{ sys.kernel }}, KERNEL_VERSION: {{ sys.kernel_version }}"
