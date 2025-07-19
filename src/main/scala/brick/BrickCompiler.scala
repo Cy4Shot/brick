@@ -101,13 +101,21 @@ object BrickCompiler {
             )
 
             if (parsedArgs.command == BrickCommand.Run) {
-              os.call(
-                cmd = "sh main.sh",
-                cwd = os.Path(path, os.pwd) / os.up,
-                stdin = os.Inherit,
-                stdout = os.Inherit,
-                stderr = os.Inherit
-              )
+              try
+                os.call(
+                  cmd = Seq("sh", "main.sh"),
+                  cwd = os.Path(path, os.pwd) / os.up,
+                  stdin = os.Inherit,
+                  stdout = os.Inherit,
+                  stderr = os.Inherit
+                )
+              catch
+                case e: os.SubprocessException =>
+                  println(s"Command failed with exit code: ${e.result.exitCode}")
+                  println("STDOUT:")
+                  println(e.result.out.text())
+                  println("STDERR:")
+                  println(e.result.err.text())
             }
           }
         } catch {
