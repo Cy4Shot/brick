@@ -8,6 +8,8 @@ protected sealed trait TmplASTLeaf {
   val pos: Pos = (0, 0)
 }
 
+sealed trait TmplStmt extends TmplASTLeaf
+
 /** Represents an identifier in the AST.
   * @param ident
   *   The identifier string.
@@ -19,11 +21,32 @@ case class Ident(ident: String)(override val pos: Pos) extends TmplASTLeaf {
 }
 object Ident extends ParserBridgePos1[String, Ident]
 
+/** Represents an if-else expression in the AST.
+  * @param cond
+  *   The condition expression.
+  * @param thenBranch
+  *   The expression to evaluate if the condition is true.
+  * @param elseBranch
+  *   The expression to evaluate if the condition is false.
+  * @param pos
+  *   The position of the if-else expression.
+  */
+case class IfElse(
+    cond: Expr.Expr,
+    thenBranch: TmplStmt,
+    elseBranch: TmplStmt
+)(override val pos: Pos)
+    extends TmplStmt {
+  override def prettyPrint: String =
+    s"if ${cond.prettyPrint} ? ${thenBranch.prettyPrint} : ${elseBranch.prettyPrint}"
+}
+object IfElse extends ParserBridgePos3[Expr.Expr, TmplStmt, TmplStmt, IfElse]
+
 object Expr {
 
   /** Represents an expression in the AST.
     */
-  sealed trait Expr extends TmplASTLeaf {
+  sealed trait Expr extends TmplStmt {
     def prettyPrint: String = this match {
       case Not(e)        => s"!(${e.prettyPrint})"
       case Neg(e)        => s"-(${e.prettyPrint})"

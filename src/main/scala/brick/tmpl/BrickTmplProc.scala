@@ -5,8 +5,7 @@ import scala.util.matching.Regex
 import parsley.Success
 import parsley.Failure
 
-import brick.parse.tmpl.parseExpr
-import brick.parse.tmpl.Ident
+import brick.parse.tmpl._
 import brick.parse.tmpl.Expr._
 
 object BrickTmplProc {
@@ -17,13 +16,23 @@ object BrickTmplProc {
     templatePattern.replaceAllIn(input, m => parse(m.group(1)))
 
   private def parse(rawExpr: String): String = {
-    val expr = parseExpr(rawExpr) match {
+    val stmt = parseExpr(rawExpr) match {
       case Success(x) => x
       case Failure(msg) => throw new IllegalArgumentException(msg)
     }
-    val evalled = eval(expr, builtin.flatten()).toString()
-    println(s"Parsed expression: ${expr} => Evaluated to: $evalled")
+    val evalled = eval(stmt, builtin.flatten()).toString()
+    println(s"Parsed expression: ${stmt} => Evaluated to: $evalled")
     evalled
+  }
+
+  def eval(stmt: TmplStmt, symbols: SymbolTable): Any = stmt match {
+    case IfElse(cond, thenBranch, elseBranch) =>
+      if (eval(cond, symbols).asInstanceOf[Boolean]) {
+        eval(thenBranch, symbols)
+      } else {
+        eval(elseBranch, symbols)
+      }
+    case expr: Expr => eval(expr, symbols)
   }
 
   def eval(expr: Expr, symbols: SymbolTable): Any = expr match {

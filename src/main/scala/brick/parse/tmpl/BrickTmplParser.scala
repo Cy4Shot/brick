@@ -11,10 +11,15 @@ import brick.parse.tmpl.Expr._
 import brick.parse.tmpl.BrickTmplLexer._
 import brick.parse.tmpl.BrickTmplLexer.implicits.implicitSymbol
 
-def parseExpr(input: String): Result[String, Expr] =
+def parseExpr(input: String): Result[String, TmplStmt] =
     parser.parse(input)
 
-private lazy val parser = fully(expr)
+private lazy val parser = fully(stmt)
+
+private lazy val stmt: Parsley[TmplStmt] =
+  IfElse("if" ~> expr, "?" ~> stmt, ":" ~> stmt)
+  | "(" ~> stmt <~ ")"
+  | expr
 
 private lazy val expr: Parsley[Expr] =
   precedence(
