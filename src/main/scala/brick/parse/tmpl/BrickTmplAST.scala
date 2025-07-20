@@ -110,12 +110,6 @@ object Expr {
     var t: Option[Type.Type] = None
   }
 
-  /** Represents an equality binary operation in the AST.
-    */
-  sealed trait EqualityBinOp extends BinOp {
-    var t: Option[Type.Type] = None
-  }
-
   /** Represents a unary operation in the AST.
     */
   sealed trait UnaryOp extends Expr {
@@ -260,7 +254,7 @@ object Expr {
     *   The position of the operation.
     */
   case class Eq(left: Expr, right: Expr)(override val pos: Pos)
-      extends EqualityBinOp
+      extends ComparisonBinOp
 
   /** Represents an inequality comparison in the AST.
     * @param left
@@ -271,7 +265,7 @@ object Expr {
     *   The position of the operation.
     */
   case class Neq(left: Expr, right: Expr)(override val pos: Pos)
-      extends EqualityBinOp
+      extends ComparisonBinOp
 
   /** Represents a logical AND operation in the AST.
     * @param left

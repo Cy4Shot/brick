@@ -2,14 +2,16 @@ package brick.tmpl
 
 import java.lang.annotation._
 import scala.quoted.Quotes
+import brick.parse.tmpl.Type._
 
-type SymbolTable = Map[String, Any]
+type TypedVal = (Any, Type)
+type SymbolTable = Map[String, TypedVal]
 
 sealed trait Node:
   def flatten(prefix: List[String] = Nil): SymbolTable
 
-case class Leaf(value: () => Any) extends Node:
-  def flatten(prefix: List[String]): Map[String, Any] =
+case class Leaf(value: () => TypedVal) extends Node:
+  def flatten(prefix: List[String]): SymbolTable =
     Map(prefix.filter(_.nonEmpty).mkString(".") -> value())
 
 case class Branch(children: Map[String, Node]) extends Node:
@@ -26,8 +28,8 @@ class Builder:
     body(using b)
     children += name -> Branch(b.children)
 
-  def value(body: => Any): Unit =
-    children += "" -> Leaf(() => body)
+  def value(body: => Any, ty: Type): Unit =
+    children += "" -> Leaf(() => (body, ty))
 
   def build(): Branch = Branch(children.filterNot(_._1 == ""))
 
@@ -37,8 +39,8 @@ object BrickTemplate:
     body
     b.build()
 
-def value(body: => Any)(using b: Builder): Unit =
-  b.value(body)
+def value(body: => Any, ty: Type)(using b: Builder): Unit =
+  b.value(body, ty)
 
 def name(name: String)(body: Builder ?=> Unit)(using b: Builder): Unit =
   b.apply(name)(body)

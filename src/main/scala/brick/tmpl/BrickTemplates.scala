@@ -3,33 +3,34 @@ package brick.tmpl
 import brick.tmpl._
 import brick.util.Platform
 import brick.link.SystemInfo
+import brick.parse.tmpl.Type._
 
 def builtin = BrickTemplate {
   "sys" ~ {
     "arch" ~ {
-      value(SystemInfo.arch)
+      value(SystemInfo.arch, TString())
     }
     "os" ~ {
-      value(SystemInfo.os)
+      value(SystemInfo.os, TString())
     }
     "kernel" ~ {
-      value(SystemInfo.kernel)
+      value(SystemInfo.kernel, TString())
     }
     "node" ~ {
-      value(SystemInfo.node)
+      value(SystemInfo.node, TString())
     }
     "kernel_version" ~ {
-      value(SystemInfo.kernelVersion)
+      value(SystemInfo.kernelVersion, TString())
     }
     "platform" ~ {
       "windows" ~ {
-        value(Platform.isWindows)
+        value(Platform.isWindows, TBool())
       }
       "linux" ~ {
-        value(Platform.isLinux)
+        value(Platform.isLinux, TBool())
       }
       "mac" ~ {
-        value(Platform.isMac)
+        value(Platform.isMac, TBool())
       }
     }
   }
