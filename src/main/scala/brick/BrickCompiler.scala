@@ -38,7 +38,7 @@ object BrickCompiler {
           Files.createDirectories(path)
           Files.write(
             path.resolve("Brickfile"),
-            s"@target $name".getBytes
+            s"@target $name\n".getBytes
           )
           Files.createFile(path.resolve(s"$name.brick"))
           println(
