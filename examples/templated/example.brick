@@ -1,5 +1,4 @@
 @source gh:rtyley/small-test-repo:916f7dbaa50350fc9c510beba3111af9e318ed8a
 
-
-EXAMPLE_VARIABLE="{{ if sys.arch == "x86_64" ? "64-bit" : "32-bit" }}"
+EXAMPLE_VARIABLE="{{ sys.arch == "x86_64" ? "64-bit" : "32-bit" }}"
 echo "I am $EXAMPLE_VARIABLE bits"

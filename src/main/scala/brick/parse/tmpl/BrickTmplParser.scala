@@ -4,7 +4,7 @@ import parsley.{Parsley, Result}
 import parsley.expr._
 import parsley.errors.combinator._
 import parsley.errors.patterns.PreventativeErrors
-import parsley.quick.notFollowedBy
+import parsley.quick.{notFollowedBy, atomic}
 
 import brick.parse.tmpl._
 import brick.parse.tmpl.Expr._
@@ -17,7 +17,7 @@ def parseExpr(input: String): Result[String, TmplStmt] =
 private lazy val parser = fully(stmt)
 
 private lazy val stmt: Parsley[TmplStmt] =
-  IfElse("if" ~> expr, "?" ~> stmt, ":" ~> stmt)
+  atomic(IfElse(expr, "?" ~> stmt, ":" ~> stmt))
   | "(" ~> stmt <~ ")"
   | expr
 

@@ -46,7 +46,7 @@ object BrickTmplProc {
 
     // ---------- Identifiers ----------
     case Identifier(Ident(name)) =>
-      symbols.getOrElse(name, throw new RuntimeException(s"Undefined variable: $name"))
+      symbols.getOrElse(name, throw new RuntimeException(s"Undefined variable: $name"))._1
 
     // ---------- Unary ----------
     case Not(e) => !eval(e).asInstanceOf[Boolean]
