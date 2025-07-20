@@ -3,15 +3,17 @@ package brick.tmpl
 import java.lang.annotation._
 import scala.quoted.Quotes
 
+type SymbolTable = Map[String, Any]
+
 sealed trait Node:
-  def flatten(prefix: List[String] = Nil): Map[String, Any]
+  def flatten(prefix: List[String] = Nil): SymbolTable
 
 case class Leaf(value: () => Any) extends Node:
   def flatten(prefix: List[String]): Map[String, Any] =
     Map(prefix.filter(_.nonEmpty).mkString(".") -> value())
 
 case class Branch(children: Map[String, Node]) extends Node:
-  def flatten(prefix: List[String]): Map[String, Any] =
+  def flatten(prefix: List[String]): SymbolTable =
     children.flatMap { case (name, node) =>
       node.flatten(prefix :+ name)
     }

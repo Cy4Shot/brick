@@ -11,8 +11,6 @@ import brick.parse.tmpl.Expr._
 
 object BrickTmplProc {
 
-  type SymbolTable = Map[String, Any]
-
   val templatePattern: Regex = """\{\{\s*(.*?)\s*\}\}""".r
 
   def processTemplate(input: String): String =
@@ -23,10 +21,7 @@ object BrickTmplProc {
       case Success(x) => x
       case Failure(msg) => throw new IllegalArgumentException(msg)
     }
-    val symbols: SymbolTable =
-      BrickTemplates.all.map(_.flatten())
-      .foldLeft(Map.empty[String, Any])((a, b) => a ++ b)
-    val evalled = eval(expr, symbols).toString()
+    val evalled = eval(expr, builtin.flatten()).toString()
     println(s"Parsed expression: ${expr} => Evaluated to: $evalled")
     evalled
   }
