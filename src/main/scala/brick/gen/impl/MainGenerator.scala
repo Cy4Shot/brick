@@ -18,9 +18,10 @@ class MainGenerator(val bricks: Bricks) extends Generator {
     builder.comment(s"Welcome to the compilation script for ${bricks.name}")
     builder.newline()
 
-    // TODO: Make this cross platform
     builder.comment("Setting up the environment")
-    builder.raw("set -euxo pipefail")
+    builder.raw("(set -e) 2>/dev/null && set -e")
+    builder.raw("(set -u) 2>/dev/null && set -u")
+    builder.raw("(set -o pipefail) 2>/dev/null && set -o pipefail")
     if (ModuleSystem.hasModuleSystem) {
       builder.raw("module purge")
     }

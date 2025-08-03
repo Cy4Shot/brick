@@ -61,7 +61,7 @@ object BrickCompiler {
             if (parsedArgs.command == BrickCommand.Run) {
               try
                 os.call(
-                  cmd = Seq("sh", "main.sh"),
+                  cmd = Seq("bash", "main.sh"),
                   cwd = targetPath.asPath,
                   stdin = os.Inherit,
                   stdout = os.Inherit,

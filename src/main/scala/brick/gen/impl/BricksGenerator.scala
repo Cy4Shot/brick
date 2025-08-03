@@ -95,10 +95,15 @@ class BricksGenerator(val brick: Brick) extends Generator {
 
     builder.comment(s"Create a full build of $name")
     builder.function(name + "_full") {
+      builder.call("taskecho", name)
       builder.ifnexists(s"$$TMP_DIR/$name.flag") {
-        builder.call(name + "_get")
-        builder.call(name + "_build")
+        builder.call("mkdir", "-p", s"$$TMP_DIR/$name")
+        builder.call("stepecho", s"Downloading $name...")
+        builder.call(name + "_get", s"> \"$$TMP_DIR/$name/download.log\" 2> >(tee -a \"$$TMP_DIR/$name/download.log\" >&2)")
+        builder.call("stepecho", s"Compiling $name...")
+        builder.call(name + "_build", s"> \"$$TMP_DIR/$name/build.log\" 2> >(tee -a \"$$TMP_DIR/$name/build.log\" >&2)")
       }
+      builder.call("successecho", s"Built $name!")
       builder.call(name + "_env")
     }
 
