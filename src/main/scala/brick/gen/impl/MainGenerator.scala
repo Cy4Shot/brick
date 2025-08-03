@@ -35,6 +35,14 @@ class MainGenerator(val bricks: Bricks) extends Generator {
     }
     builder.newline()
 
+    if (bricks.packages.nonEmpty) {
+      builder.comment("Installing required packages")
+      for (pkg <- bricks.packages) {
+        builder.install(pkg)
+      }
+      builder.newline()
+    }
+
     builder.comment("Actually building the bricks")
     builder.call("titleecho", "Compiling bricks")
 

@@ -39,10 +39,10 @@ object BrickConcretizer {
     val source = res.stmts.collect { case BrickAST.SourceFlag(sourceOpt) =>
       sourceOpt
     } match {
-      case Nil         => throwError(s"No source specified for $input.")
+      case Nil         => throwError(s"$input: No source specified.")
       case head :: Nil => head
       case head :: tail =>
-        throwError(s"Multiple sources specified for $input: ${head :: tail}.")
+        throwError(s"$input: Multiple sources specified: ${head :: tail}.")
     }
 
     val envs = res.stmts
@@ -57,8 +57,11 @@ object BrickConcretizer {
         s"${module.name}${module.version.map(v => s"/$v").getOrElse("")}"
       )
 
-    val packages = res.stmts
-      .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
+    res.stmts.foreach {
+      case BrickAST.TargetFlag(_) => throwError(s"$input: Target flags are only supported in root Brickfile.")
+      case BrickAST.PackageFlag(_) => throwError(s"$input: Package flags are only supported in root Brickfile.")
+      case _ => ()
+    }
 
     val commands = res.stmts
       .collect { case BrickAST.CommandStmt(command) => command }
@@ -73,8 +76,7 @@ object BrickConcretizer {
         source = source,
         envs = envs,
         modules = modules,
-        commands = commands,
-        packages = packages
+        commands = commands
       )
     )
   }
@@ -102,27 +104,6 @@ object BrickConcretizer {
     result.toList
   }
 
-  private def concretizeTargets(root: FileUtil): List[Bricks] = {
-    if (!root.exists("Brickfile")) {
-      throwError(s"Brickfile does not exist in $root.")
-    }
-
-    val res = parseBrickFile(root.sub("Brickfile"))
-    val targets = res.stmts.collect { case BrickAST.TargetFlag(target) =>
-      target
-    }
-
-    if (targets.isEmpty) {
-      throwError("No targets specified in Brickfile.")
-    }
-
-    // Concretize each target
-    targets.map { target =>
-      val tree = _concretize(target.opt, root)
-      Bricks(target.opt, flattenToCompilationOrder(tree))
-    }
-  }
-
   private def parseBrickFile(inputFile: FileUtil): Program = {
     BrickParser.parseString(inputFile.read()) match {
       case Failure(msg) =>
@@ -132,6 +113,26 @@ object BrickConcretizer {
   }
 
   def concretize(root: FileUtil): List[Bricks] = {
-    concretizeTargets(root)
+    if (!root.exists("Brickfile")) {
+      throwError(s"Brickfile does not exist in $root.")
+    }
+
+    val res = parseBrickFile(root.sub("Brickfile"))
+    val targets = res.stmts.collect { case BrickAST.TargetFlag(target) =>
+      target
+    }
+
+    val packages = res.stmts
+      .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
+
+    if (targets.isEmpty) {
+      throwError("No targets specified in Brickfile.")
+    }
+
+    // Concretize each target
+    targets.map { target =>
+      val tree = _concretize(target.opt, root)
+      Bricks(target.opt, flattenToCompilationOrder(tree), packages)
+    }
   }
 }

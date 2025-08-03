@@ -5,7 +5,7 @@ import brick.parse.BrickAST.SourceOpt
 case class BrickTree(
   name: String,
   dependencies: List[BrickTree],
-  brick: Brick
+  brick: Brick,
 )
 
 case class Brick(
@@ -15,10 +15,10 @@ case class Brick(
   envs: Map[String, String],
   modules: List[String],
   commands: List[String],
-  packages: List[String]
 )
 
 case class Bricks(
   name: String,
-  bricks: List[Brick]
+  bricks: List[Brick],
+  packages: List[String],
 )
