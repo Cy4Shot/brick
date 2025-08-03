@@ -2,12 +2,10 @@ package brick.gen.impl
 
 import brick.conc.Brick
 import brick.gen.*
-import brick.log.LoggingCtx
 import brick.parse.BrickAST.{GitSource, GithubSource, UrlSource}
 import brick.util.IndentedStringBuilder
 
-class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
-    extends Generator {
+class BricksGenerator(val brick: Brick) extends Generator {
 
   val name: String = brick.name.toLowerCase
   private val NAME: String = brick.name.toUpperCase
@@ -54,7 +52,12 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
         case UrlSource(pos) =>
           builder.call("curldownload", s"$$${NAME}_BUILD_DIR", s"$$${NAME}_URL")
         case GitSource(_) | GithubSource(_) =>
-          builder.call("gitdownload", s"$$${NAME}_BUILD_DIR", s"$$${NAME}_URL", s"$$${NAME}_HASH")
+          builder.call(
+            "gitdownload",
+            s"$$${NAME}_BUILD_DIR",
+            s"$$${NAME}_URL",
+            s"$$${NAME}_HASH"
+          )
       }
       builder.iffail {
         builder.call("errecho", s"Failed to download ${brick.name} source!")
@@ -76,9 +79,18 @@ class BricksGenerator(val brick: Brick)(implicit ctx: LoggingCtx)
     builder.function(name + "_env") {
       builder.set("PATH", s"$${${NAME}_INSTALL_DIR}/bin:$${PATH:-}")
       builder.set("CPATH", s"$${${NAME}_INSTALL_DIR}/include:$${CPATH:-}")
-      builder.set("CMAKE_PREFIX_PATH", s"$${${NAME}_INSTALL_DIR}:$${CMAKE_PREFIX_PATH:-}")
-      builder.set("LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$${LIBRARY_PATH:-}")
-      builder.set("LD_LIBRARY_PATH", s"$${${NAME}_INSTALL_DIR}/lib:$${LD_LIBRARY_PATH:-}")
+      builder.set(
+        "CMAKE_PREFIX_PATH",
+        s"$${${NAME}_INSTALL_DIR}:$${CMAKE_PREFIX_PATH:-}"
+      )
+      builder.set(
+        "LIBRARY_PATH",
+        s"$${${NAME}_INSTALL_DIR}/lib:$${LIBRARY_PATH:-}"
+      )
+      builder.set(
+        "LD_LIBRARY_PATH",
+        s"$${${NAME}_INSTALL_DIR}/lib:$${LD_LIBRARY_PATH:-}"
+      )
     }
 
     builder.comment(s"Create a full build of $name")

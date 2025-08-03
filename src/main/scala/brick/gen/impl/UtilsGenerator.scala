@@ -1,7 +1,6 @@
 package brick.gen.impl
 
 import brick.gen.*
-import brick.log.LoggingCtx
 
 import scala.collection.mutable
 
@@ -380,7 +379,7 @@ curldownload() {
 }
 """
 
-class UtilsGenerator()(implicit ctx: LoggingCtx) extends Generator {
+class UtilsGenerator() extends Generator {
 
   def validate()(implicit builder: ScriptBuilder): Unit = {}
 

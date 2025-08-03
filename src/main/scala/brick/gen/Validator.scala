@@ -1,22 +1,22 @@
 package brick.gen
 
-import brick.log.*
+import brick.util.Logging._
 
 object Validator {
   def checkExecutable(
       executable: String,
       compilerType: String,
       required: Boolean = true
-  )(implicit ctx: LoggingCtx): String =
+  ): String =
     brick.link.GenHelper.whichExecutable(executable) match {
       case Some(path) => path
       case None =>
         if (required)
-          ctx.exit(
+          throwError(
             s"$compilerType $executable not found in PATH. Please ensure it is installed and available."
           )
         else {
-          ctx.logWarn(
+          printWarn(
             s"$compilerType $executable not found in PATH. Continuing without it."
           )
           ""

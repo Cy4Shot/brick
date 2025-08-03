@@ -3,12 +3,10 @@ package brick.gen.impl
 import brick.conc.Bricks
 import brick.gen.*
 import brick.link.ModuleSystem
-import brick.log.LoggingCtx
 import brick.parse.BrickAST.{GitSource, GithubSource, UrlSource}
 import brick.util.IndentedStringBuilder
 
-class MainGenerator(val bricks: Bricks)(implicit ctx: LoggingCtx)
-    extends Generator {
+class MainGenerator(val bricks: Bricks) extends Generator {
 
   val name: String = bricks.name.toLowerCase
 

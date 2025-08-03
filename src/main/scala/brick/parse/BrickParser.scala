@@ -9,7 +9,7 @@ import parsley.{Parsley, Result}
 
 object BrickParser {
   def parseString(input: String): Result[String, Program] =
-    parser.parse(input)
+    parser.parse(input + "\n")
 
   private lazy val parser = fully(program)
 
