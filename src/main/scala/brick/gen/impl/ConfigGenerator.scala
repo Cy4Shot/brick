@@ -59,7 +59,6 @@ class ConfigGenerator(
     builder.newline()
 
     builder.comment("Directory Config")
-    // TODO: Make this cross-platform
     builder.raw(s"export BRICKS_ROOT_DIR=$$(readlink -f ./$rootDirectory)")
     builder.set("TMP_DIR", "${BRICKS_ROOT_DIR}/" + tmpDirectory)
     builder.set("BUILD_DIR", "${BRICKS_ROOT_DIR}/" + buildDirectory)

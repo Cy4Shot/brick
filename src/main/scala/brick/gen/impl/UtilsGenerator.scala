@@ -181,6 +181,11 @@ curldownload() {
             errecho "Extraction failed for '$download_path' (tar.bz2)"
             success=1
         fi
+    elif [[ "$archive_type" == "tar" || "$filename" == *.tar ]]; then
+        if ! tar --strip-components=1 -xvf "$download_path" -C "."; then
+            errecho "Extraction failed for '$download_path' (tar)"
+            success=1
+        fi
     elif [[ "$archive_type" == "none" ]]; then
         warnecho "Extraction skipped as per user request (type: none). Moving file instead."
         if ! mv "$download_path" "."; then

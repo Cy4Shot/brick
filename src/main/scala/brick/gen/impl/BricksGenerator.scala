@@ -84,9 +84,17 @@ class BricksGenerator(val brick: Brick) extends Generator {
         "LIBRARY_PATH",
         s"$${${NAME}_INSTALL_DIR}/lib:$${LIBRARY_PATH:-}"
       )
+       builder.set(
+        "LIBRARY_PATH",
+        s"$${${NAME}_INSTALL_DIR}/lib64:$${LIBRARY_PATH:-}"
+      )
       builder.set(
         "LD_LIBRARY_PATH",
         s"$${${NAME}_INSTALL_DIR}/lib:$${LD_LIBRARY_PATH:-}"
+      )
+      builder.set(
+        "LD_LIBRARY_PATH",
+        s"$${${NAME}_INSTALL_DIR}/lib64:$${LD_LIBRARY_PATH:-}"
       )
     }
 

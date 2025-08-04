@@ -37,35 +37,25 @@ static const char* module_env_vars[] = {
 int check_module_env_vars() {
     for (int i = 0; module_env_vars[i] != NULL; i++) {
         if (getenv(module_env_vars[i]) != NULL) {
-            return 1; // Found module environment variable
+            return 1;
         }
     }
     return 0;
 }
 
 char* detect_module_system() {
-    // First check environment variables
-    if (check_module_env_vars()) {
-        // If environment variables are set, check for executables
-        for (int i = 0; module_systems[i] != NULL; i++) {
-            char* found = find_executable_in_path(module_systems[i]);
-            if (found) {
-                return found;
-            }
-        }
-        // If env vars exist but no executable found, return generic "module"
-        #ifdef _WIN32
-        return _strdup("module");
-        #else
-        return strdup("module");
-        #endif
-    }
-    
-    // Check for executables even without environment variables
     for (int i = 0; module_systems[i] != NULL; i++) {
         char* found = find_executable_in_path(module_systems[i]);
         if (found) {
-            return found;
+            char command[1024];
+            snprintf(command, sizeof(command), "%s --version 2>" NULL_DEVICE " > " NULL_DEVICE, found);
+            
+            int result = system(command);
+            if (result == 0) {
+                return found;
+            } else {
+                free(found);
+            }
         }
     }
     
@@ -75,12 +65,11 @@ char* detect_module_system() {
 int is_module_available(const char* module_name) {
     char* module_cmd = detect_module_system();
     if (!module_cmd) {
-        return 0; // No module system found
+        return 0;
     }
     
     char command[1024];
-    
-    // Try different module availability check commands
+
     const char* check_commands[] = {
         "%s avail %s 2>" NULL_DEVICE " | grep -q %s",
         "%s spider %s 2>" NULL_DEVICE " > " NULL_DEVICE,
@@ -94,12 +83,12 @@ int is_module_available(const char* module_name) {
         int result = system(command);
         if (result == 0) {
             free(module_cmd);
-            return 1; // Module is available
+            return 1;
         }
     }
     
     free(module_cmd);
-    return 0; // Module not found or error occurred
+    return 0;
 }
 
 char* get_module_system() {
@@ -108,11 +97,14 @@ char* get_module_system() {
 
 int has_module_system() {
     char* module_cmd = detect_module_system();
-    if (module_cmd) {
-        free(module_cmd);
-        return 1;
+    if (!module_cmd) {
+        return 0;
     }
-    return 0;
+    char command[1024];
+    snprintf(command, sizeof(command), "%s --version 2>" NULL_DEVICE " > " NULL_DEVICE, module_cmd);
+    int result = system(command);
+    free(module_cmd);
+    return (result == 0) ? 1 : 0;
 }
 
 char* get_modulepath() {
