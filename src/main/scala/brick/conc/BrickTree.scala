@@ -17,10 +17,14 @@ case class Brick(
     commands: List[String]
 )
 
+case class BricksCtx(
+    compilers: Map[String, String],
+    compilerFlags: Map[String, List[String]]
+)
+
 case class Bricks(
     name: String,
     bricks: List[Brick],
     packages: List[String],
-    compilers: Map[String, String],
-    compilerFlags: Map[String, List[String]]
+    ctx: BricksCtx
 )

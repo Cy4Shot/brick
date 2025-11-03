@@ -3,6 +3,7 @@ package brick.gen
 import brick.link.PacmanHelper
 import brick.util.IndentedStringBuilder
 import brick.tmpl.BrickTmplProc
+import brick.conc.BricksCtx
 
 abstract class ScriptBuilder {
   val ext: String
@@ -38,9 +39,10 @@ abstract class ScriptBuilder {
   )(implicit b: IndentedStringBuilder): Unit
 
   def rawTemplated(
-      text: String
+      text: String,
+      ctx: BricksCtx
   )(implicit b: IndentedStringBuilder): Unit = {
-    raw(BrickTmplProc.processTemplate(text))(b)
+    raw(BrickTmplProc.processTemplate(text)(using ctx))(b)
   }
 
   def raw(

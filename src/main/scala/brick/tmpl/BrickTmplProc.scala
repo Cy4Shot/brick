@@ -7,17 +7,27 @@ import parsley.Failure
 
 import brick.parse.tmpl._
 import brick.parse.tmpl.Expr._
+import brick.conc.BricksCtx
 
 object BrickTmplProc {
 
   val templatePattern: Regex = """\{\{\s*(.*?)\s*\}\}""".r
 
-  def processTemplate(input: String): String =
-    templatePattern.replaceAllIn(input, m => parse(m.group(1)))
+  def processTemplate(input: String)(using BricksCtx): String = {
+    val sb = new StringBuilder
+    var lastIndex = 0
+    for (m <- templatePattern.findAllMatchIn(input)) {
+      sb.append(input.substring(lastIndex, m.start))
+      sb.append(parse(m.group(1)))
+      lastIndex = m.end
+    }
+    sb.append(input.substring(lastIndex))
+    sb.toString()
+  }
 
-  private def parse(rawExpr: String): String = {
+  private def parse(rawExpr: String)(using BricksCtx): String = {
     val stmt = parseExpr(rawExpr) match {
-      case Success(x) => x
+      case Success(x)   => x
       case Failure(msg) => throw new IllegalArgumentException(msg)
     }
     given SymbolTable = builtin.flatten()
@@ -27,52 +37,65 @@ object BrickTmplProc {
     evalled
   }
 
-  def eval(stmt: TmplStmt)(using SymbolTable): Any = stmt match {
-    case IfElse(cond, thenBranch, elseBranch) =>
-      if (eval(cond).asInstanceOf[Boolean]) {
-        eval(thenBranch)
-      } else {
-        eval(elseBranch)
-      }
-    case expr: Expr => eval(expr)
-  }
+  def eval(stmt: TmplStmt)(using SymbolTable)(using BricksCtx): Any =
+    stmt match {
+      case IfElse(cond, thenBranch, elseBranch) =>
+        if (eval(cond).asInstanceOf[Boolean]) {
+          eval(thenBranch)
+        } else {
+          eval(elseBranch)
+        }
+      case expr: Expr => eval(expr)
+    }
 
-  def eval(expr: Expr)(using symbols: SymbolTable): Any = expr match {
-     // ---------- Literals ----------
-    case IntLiteral(x)    => x
-    case BoolLiteral(b)   => b
-    case CharLiteral(c)   => c
-    case StrLiteral(v)    => v
+  def eval(expr: Expr)(using symbols: SymbolTable)(using ctx: BricksCtx): Any =
+    expr match {
+      // ---------- Literals ----------
+      case IntLiteral(x)  => x
+      case BoolLiteral(b) => b
+      case CharLiteral(c) => c
+      case StrLiteral(v)  => v
 
-    // ---------- Identifiers ----------
-    case Identifier(Ident(name)) =>
-      symbols.getOrElse(name, throw new RuntimeException(s"Undefined variable: $name"))._1
+      // ---------- Identifiers ----------
+      case Identifier(Ident(name)) =>
+        symbols
+          .getOrElse(
+            name,
+            throw new RuntimeException(s"Undefined variable: $name")
+          )
+          ._1
+          .apply(ctx)
 
-    // ---------- Unary ----------
-    case Not(e) => !eval(e).asInstanceOf[Boolean]
-    case Neg(e) => -eval(e).asInstanceOf[Int]
+      // ---------- Unary ----------
+      case Not(e) => !eval(e).asInstanceOf[Boolean]
+      case Neg(e) => -eval(e).asInstanceOf[Int]
 
-    // ---------- Arithmetic ----------
-    case Add(l, r) => eval(l).asInstanceOf[Int] + eval(r).asInstanceOf[Int]
-    case Sub(l, r) => eval(l).asInstanceOf[Int] - eval(r).asInstanceOf[Int]
-    case Mul(l, r) => eval(l).asInstanceOf[Int] * eval(r).asInstanceOf[Int]
-    case Div(l, r) => eval(l).asInstanceOf[Int] / eval(r).asInstanceOf[Int]
-    case Mod(l, r) => eval(l).asInstanceOf[Int] % eval(r).asInstanceOf[Int]
+      // ---------- Arithmetic ----------
+      case Add(l, r) => eval(l).asInstanceOf[Int] + eval(r).asInstanceOf[Int]
+      case Sub(l, r) => eval(l).asInstanceOf[Int] - eval(r).asInstanceOf[Int]
+      case Mul(l, r) => eval(l).asInstanceOf[Int] * eval(r).asInstanceOf[Int]
+      case Div(l, r) => eval(l).asInstanceOf[Int] / eval(r).asInstanceOf[Int]
+      case Mod(l, r) => eval(l).asInstanceOf[Int] % eval(r).asInstanceOf[Int]
 
-    // ---------- Comparison ----------
-    case Greater(l, r)   => eval(l).asInstanceOf[Int] > eval(r).asInstanceOf[Int]
-    case GreaterEq(l, r) => eval(l).asInstanceOf[Int] >= eval(r).asInstanceOf[Int]
-    case Less(l, r)      => eval(l).asInstanceOf[Int] < eval(r).asInstanceOf[Int]
-    case LessEq(l, r)    => eval(l).asInstanceOf[Int] <= eval(r).asInstanceOf[Int]
+      // ---------- Comparison ----------
+      case Greater(l, r) =>
+        eval(l).asInstanceOf[Int] > eval(r).asInstanceOf[Int]
+      case GreaterEq(l, r) =>
+        eval(l).asInstanceOf[Int] >= eval(r).asInstanceOf[Int]
+      case Less(l, r) => eval(l).asInstanceOf[Int] < eval(r).asInstanceOf[Int]
+      case LessEq(l, r) =>
+        eval(l).asInstanceOf[Int] <= eval(r).asInstanceOf[Int]
 
-    // ---------- Equality ----------
-    case Eq(l, r)  => eval(l) == eval(r)
-    case Neq(l, r) => eval(l) != eval(r)
+      // ---------- Equality ----------
+      case Eq(l, r)  => eval(l) == eval(r)
+      case Neq(l, r) => eval(l) != eval(r)
 
-    // ---------- Logical ----------
-    case And(l, r) => eval(l).asInstanceOf[Boolean] && eval(r).asInstanceOf[Boolean]
-    case Or(l, r)  => eval(l).asInstanceOf[Boolean] || eval(r).asInstanceOf[Boolean]
+      // ---------- Logical ----------
+      case And(l, r) =>
+        eval(l).asInstanceOf[Boolean] && eval(r).asInstanceOf[Boolean]
+      case Or(l, r) =>
+        eval(l).asInstanceOf[Boolean] || eval(r).asInstanceOf[Boolean]
 
-    case _ => throw new RuntimeException(s"Unhandled expression: $expr")
-  }
+      case _ => throw new RuntimeException(s"Unhandled expression: $expr")
+    }
 }

@@ -37,4 +37,33 @@ def builtin = BrickTemplate {
       value("${NUM_THREADS}", TVar())
     }
   }
+  Seq("compiler", "comp") ~ {
+    Seq("c", "cc") ~ {
+      dynamic(_.compilers.getOrElse("cc", ""), TVar())
+    }
+    Seq("cxx", "cpp", "c++") ~ {
+      dynamic(_.compilers.getOrElse("cxx", ""), TVar())
+    }
+    Seq("fortran", "fc", "f90") ~ {
+      dynamic(_.compilers.getOrElse("fc", ""), TVar())
+    }
+    Seq("mpic", "mpicc") ~ {
+      dynamic(_.compilers.getOrElse("mpicc", ""), TVar())
+    }
+    Seq("mpicxx", "mpic++", "mpicpp") ~ {
+      dynamic(_.compilers.getOrElse("mpicxx", ""), TVar())
+    }
+    Seq("mpifortran", "mpifc", "mpif90") ~ {
+      dynamic(_.compilers.getOrElse("mpifc", ""), TVar())
+    }
+    Seq("cflags", "c_flags") ~ {
+      dynamic(_.compilerFlags.getOrElse("cflags", ""), TVar())
+    }
+    Seq("cxxflags", "cxx_flags") ~ {
+      dynamic(_.compilerFlags.getOrElse("cxxflags", ""), TVar())
+    }
+    Seq("fcflags", "fc_flags") ~ {
+      dynamic(_.compilerFlags.getOrElse("fcflags", ""), TVar())
+    }
+  }
 }

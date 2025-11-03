@@ -48,20 +48,11 @@ object BrickCompiler {
           val tree: List[Bricks] = BrickConcretizer.concretize(brickDir)
           for (bricks <- tree) {
             val targetPath = outputDir.sub(bricks.name)
-            ConfigGenerator(
-              cc = bricks.compilers.getOrElse("cc", "gcc"),
-              cxx = bricks.compilers.getOrElse("cxx", "g++"),
-              fc = bricks.compilers.getOrElse("fc", "gfortran"),
-              mpicc = bricks.compilers.getOrElse("mpicc", "mpicc"),
-              mpicxx = bricks.compilers.getOrElse("mpicxx", "mpicxx"),
-              mpifc = bricks.compilers.getOrElse("mpifc", "mpif90"),
-              cflags = bricks.compilerFlags.getOrElse("cflags", List()),
-              cxxflags = bricks.compilerFlags.getOrElse("cxxflags", List()),
-              fcflags = bricks.compilerFlags.getOrElse("fcflags", List())
-            ).write(targetPath, "config")
+            ConfigGenerator(bricks.ctx).write(targetPath, "config")
             UtilsGenerator().write(targetPath, "utils")
             for (brick <- bricks.bricks) {
-              BricksGenerator(brick).write(targetPath.sub("pkg"), brick.name)
+              BricksGenerator(brick, bricks.ctx)
+                .write(targetPath.sub("pkg"), brick.name)
             }
             MainGenerator(bricks).write(targetPath, "main", true)
             printSuccess(

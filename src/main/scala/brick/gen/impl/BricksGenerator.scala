@@ -1,11 +1,11 @@
 package brick.gen.impl
 
-import brick.conc.Brick
+import brick.conc.{Brick, BricksCtx}
 import brick.gen.*
 import brick.parse.BrickAST.{GitSource, GithubSource, UrlSource}
 import brick.util.IndentedStringBuilder
 
-class BricksGenerator(val brick: Brick) extends Generator {
+class BricksGenerator(val brick: Brick, val ctx: BricksCtx) extends Generator {
 
   val name: String = brick.name.toLowerCase
   private val NAME: String = brick.name.toUpperCase
@@ -66,7 +66,7 @@ class BricksGenerator(val brick: Brick) extends Generator {
       builder.call("pushd", s"$$${NAME}_BUILD_DIR")
       builder.call(name + "_conf")
 
-      brick.commands.foreach(builder.rawTemplated)
+      brick.commands.foreach(builder.rawTemplated(_, ctx))
 
       builder.call("popd")
       builder.call("touch", s"$$TMP_DIR/$name.flag")
@@ -84,7 +84,7 @@ class BricksGenerator(val brick: Brick) extends Generator {
         "LIBRARY_PATH",
         s"$${${NAME}_INSTALL_DIR}/lib:$${LIBRARY_PATH:-}"
       )
-       builder.set(
+      builder.set(
         "LIBRARY_PATH",
         s"$${${NAME}_INSTALL_DIR}/lib64:$${LIBRARY_PATH:-}"
       )
@@ -104,9 +104,15 @@ class BricksGenerator(val brick: Brick) extends Generator {
       builder.ifnexists(s"$$TMP_DIR/$name.flag") {
         builder.call("mkdir", "-p", s"$$TMP_DIR/$name")
         builder.call("stepecho", s"Downloading $name...")
-        builder.call(name + "_get", s"> \"$$TMP_DIR/$name/download.log\" 2> >(tee -a \"$$TMP_DIR/$name/download.log\" >&2)")
+        builder.call(
+          name + "_get",
+          s"> \"$$TMP_DIR/$name/download.log\" 2> >(tee -a \"$$TMP_DIR/$name/download.log\" >&2)"
+        )
         builder.call("stepecho", s"Compiling $name...")
-        builder.call(name + "_build", s"> \"$$TMP_DIR/$name/build.log\" 2> >(tee -a \"$$TMP_DIR/$name/build.log\" >&2)")
+        builder.call(
+          name + "_build",
+          s"> \"$$TMP_DIR/$name/build.log\" 2> >(tee -a \"$$TMP_DIR/$name/build.log\" >&2)"
+        )
       }
       builder.call("successecho", s"Built $name!")
       builder.call(name + "_env")
