@@ -33,5 +33,8 @@ def builtin = BrickTemplate {
         value(Platform.isMac, TBool())
       }
     }
+    "nproc" ~ {
+      value("${NUM_THREADS}", TVar())
+    }
   }
 }

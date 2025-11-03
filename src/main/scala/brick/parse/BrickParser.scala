@@ -11,24 +11,49 @@ object BrickParser {
   def parseString(input: String): Result[String, Program] =
     parser.parse(input + "\n")
 
-  private lazy val parser = fully(program)
+  def parseRootString(input: String): Result[String, Program] =
+    rootParser.parse(input + "\n")
 
-  private lazy val program: Parsley[Program] =
-    Program(stmts)
+  private lazy val parser = fully(program)
+  private lazy val rootParser = fully(rootProgram)
+
+  private lazy val program: Parsley[Program] = Program(stmts)
+  private lazy val rootProgram: Parsley[Program] = Program(rootStmts)
 
   private lazy val stmts: Parsley[List[Stmt]] =
-    many(stmt) <~ eof
+    many("@" ~> flagStmt | commandStmt) <~ eof
 
-  private lazy val stmt: Parsley[Stmt] =
-    "@" ~> flagStmt | commandStmt
+  private lazy val rootStmts: Parsley[List[Stmt]] =
+    many("@" ~> rootFlagStmt | commandStmt) <~ eof
 
   private lazy val flagStmt: Parsley[Flag] =
     ModulesFlag("modules" ~> manyTill(moduleOpt, endOfLine))
-      | TargetFlag("target" ~> basicOpt)
       | EnvironmentFlag("env" ~> envOpt)
       | SourceFlag("source" ~> sourceOpt)
       | DependenciesFlag("dep" ~> basicOpt)
+
+  private lazy val rootFlagStmt: Parsley[Flag] = (
+    TargetFlag("target" ~> basicOpt)
       | PackageFlag("pkg" ~> basicOpt)
+      | CompilerFlagsFlag(
+        CompilerFlags.CFLAGS <# atomic("cflags"),
+        someTill(basicOpt, endOfLine)
+      )
+      | CompilerFlagsFlag(
+        CompilerFlags.CXXFLAGS <# atomic("cxxflags"),
+        someTill(basicOpt, endOfLine)
+      )
+      | CompilerFlagsFlag(
+        CompilerFlags.FCFLAGS <# atomic("fcflags"),
+        someTill(basicOpt, endOfLine)
+      )
+      | CompilerFlag(Compiler.CC <# atomic("cc"), basicOpt)
+      | CompilerFlag(Compiler.CXX <# atomic("cxx"), basicOpt)
+      | CompilerFlag(Compiler.FC <# atomic("fc"), basicOpt)
+      | CompilerFlag(Compiler.MPICC <# atomic("mpicc"), basicOpt)
+      | CompilerFlag(Compiler.MPICXX <# atomic("mpicxx"), basicOpt)
+      | CompilerFlag(Compiler.MPIFC <# atomic("mpifc"), basicOpt)
+  )
 
   private lazy val moduleOpt: Parsley[ModuleOpt] =
     ModuleOpt(identifier, option(version))

@@ -16,7 +16,9 @@ class ConfigGenerator(
     val mpicc: String = "mpicc",
     val mpicxx: String = "mpicxx",
     val mpifc: String = "mpif90",
-    val flags: String = "",
+    val cflags: List[String] = Nil,
+    val cxxflags: List[String] = Nil,
+    val fcflags: List[String] = Nil,
     val nvhpc: Option[NVHPCConfig] = None
 ) extends Generator {
 
@@ -79,9 +81,9 @@ class ConfigGenerator(
     builder.newline()
 
     builder.comment("Compilation Options")
-    builder.set("GLOBAL_CFLAGS", flags)
-    builder.set("GLOBAL_CXXFLAGS", flags)
-    builder.set("GLOBAL_FCFLAGS", flags)
+    builder.set("GLOBAL_CFLAGS", cflags.mkString(" "))
+    builder.set("GLOBAL_CXXFLAGS", cxxflags.mkString(" "))
+    builder.set("GLOBAL_FCFLAGS", fcflags.mkString(" "))
     builder.set("NUM_THREADS", threads)
     builder.newline()
 

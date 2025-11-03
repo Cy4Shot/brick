@@ -1,2 +1,12 @@
 @target openmpi
-@pkg autoconf
+
+@cc gcc
+@cxx g++
+@fc gfortran
+@mpicc mpicc
+@mpicxx mpicxx
+@mpifc mpif90
+
+@cflags -fPIC -fopenmp -O3
+@cxxflags -fPIC -fopenmp -O3
+@fcflags -fPIC

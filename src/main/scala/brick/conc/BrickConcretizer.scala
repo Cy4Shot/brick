@@ -57,12 +57,6 @@ object BrickConcretizer {
         s"${module.name}${module.version.map(v => s"/$v").getOrElse("")}"
       )
 
-    res.stmts.foreach {
-      case BrickAST.TargetFlag(_) => throwError(s"$input: Target flags are only supported in root Brickfile.")
-      case BrickAST.PackageFlag(_) => throwError(s"$input: Package flags are only supported in root Brickfile.")
-      case _ => ()
-    }
-
     val commands = res.stmts
       .collect { case BrickAST.CommandStmt(command) => command }
       .filter(_.nonEmpty)
@@ -90,7 +84,7 @@ object BrickConcretizer {
       if (visiting.contains(program.name)) {
         throwError(s"Cyclical dependency detected involving: ${program.name}")
       }
-      
+
       if (!visited.contains(program.name)) {
         visiting.add(program.name)
         program.dependencies.foreach(dfs)
@@ -102,6 +96,14 @@ object BrickConcretizer {
 
     dfs(root)
     result.toList
+  }
+
+  private def parseRootBrickFile(inputFile: FileUtil): Program = {
+    BrickParser.parseRootString(inputFile.read()) match {
+      case Failure(msg) =>
+        throwError(s"Error parsing $inputFile:\n$msg")
+      case Success(x) => x
+    }
   }
 
   private def parseBrickFile(inputFile: FileUtil): Program = {
@@ -117,13 +119,23 @@ object BrickConcretizer {
       throwError(s"Brickfile does not exist in $root.")
     }
 
-    val res = parseBrickFile(root.sub("Brickfile"))
+    val res = parseRootBrickFile(root.sub("Brickfile"))
     val targets = res.stmts.collect { case BrickAST.TargetFlag(target) =>
       target
     }
 
     val packages = res.stmts
       .collect { case BrickAST.PackageFlag(BasicOpt(pkg)) => pkg }
+
+    val compilers = res.stmts.collect {
+      case BrickAST.CompilerFlag(compiler, BasicOpt(binary)) =>
+        compiler.prettyPrint -> binary
+    }.toMap
+
+    val compilerFlags = res.stmts.collect {
+      case BrickAST.CompilerFlagsFlag(flag, flags) =>
+        flag.prettyPrint -> flags.map(_.opt)
+    }.toMap
 
     if (targets.isEmpty) {
       throwError("No targets specified in Brickfile.")
@@ -132,7 +144,13 @@ object BrickConcretizer {
     // Concretize each target
     targets.map { target =>
       val tree = _concretize(target.opt, root)
-      Bricks(target.opt, flattenToCompilationOrder(tree), packages)
+      Bricks(
+        target.opt,
+        flattenToCompilationOrder(tree),
+        packages,
+        compilers,
+        compilerFlags
+      )
     }
   }
 }

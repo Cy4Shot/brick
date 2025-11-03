@@ -366,6 +366,7 @@ object Type {
         case TBool(_)   => "bool"
         case TChar(_)   => "char"
         case TString(_) => "string"
+        case TVar(_)    => "var"
       }
   }
 
@@ -393,8 +394,15 @@ object Type {
     */
   case class TString(override val pos: Pos) extends Type
 
+  /** Represents a type variable in the AST.
+    * @param pos
+    *   The position of the type.
+    */
+  case class TVar(override val pos: Pos) extends Type
+
   object TInt extends ParserBridgePos0[Type]
   object TBool extends ParserBridgePos0[Type]
   object TChar extends ParserBridgePos0[Type]
   object TString extends ParserBridgePos0[Type]
+  object TVar extends ParserBridgePos0[Type]
 }
