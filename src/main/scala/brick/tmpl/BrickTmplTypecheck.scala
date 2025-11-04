@@ -4,6 +4,27 @@ import brick.parse.tmpl._
 import brick.parse.tmpl.Type._
 import brick.parse.tmpl.Expr._
 
+private def resolveIdentifierType(name: String, ctx: SymbolTable): Type = {
+  ctx.get(name) match {
+    case Some(Left((_, ty))) => ty
+    case Some(Right(_)) =>
+      throw new Exception(s"Unexpected wildcard entry for: ${name}")
+    case None =>
+      val wildcardMatch = ctx.iterator
+        .find {
+          case (pattern, Right(_)) if pattern.endsWith(".*") =>
+            val prefix = pattern.stripSuffix(".*")
+            name.startsWith(prefix + ".")
+          case _ => false
+        }
+        .collect { case (_, Right((_, ty))) => ty }
+
+      wildcardMatch.getOrElse(
+        throw new Exception(s"Identifier ${name} not found in context")
+      )
+  }
+}
+
 def typecheck(tmpl: TmplStmt)(using ctx: SymbolTable): Type = tmpl match {
   case IfElse(cond, ifBranch, elseBranch) =>
     verify(cond, TBool())
@@ -23,11 +44,7 @@ def typecheck(tmpl: TmplStmt)(using ctx: SymbolTable): Type = tmpl match {
     verify(c.right, leftType)
     TBool()
   case Identifier(Ident(name)) =>
-    ctx.get(name) match {
-      case Some((_, ty)) => ty
-      case None =>
-        throw new Exception(s"Identifier ${name} not found in context")
-    }
+    resolveIdentifierType(name, ctx)
 }
 
 private def verify(expr: TmplStmt, expectedType: Type)(using

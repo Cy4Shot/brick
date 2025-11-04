@@ -1,12 +1,12 @@
 package brick.gen.impl
 
-import brick.conc.BricksCtx
 import brick.gen.*
 import brick.util.{IndentedStringBuilder, NVHPCConfig}
 import brick.util.Logging._
+import brick.conc.Bricks
 
 class ConfigGenerator(
-    val ctx: BricksCtx,
+    val ctx: Bricks,
     val threadOverride: Int = 0,
     val rootDirectory: String = "brick",
     val tmpDirectory: String = "tmp",
@@ -38,14 +38,14 @@ class ConfigGenerator(
         "Directories cannot be empty. Please provide valid paths for tmp, build, and install directories."
       )
     }
-    if (cc.isEmpty) printError("Compiler 'cc' is not set. Defaulting to gcc.")
-    if (cxx.isEmpty) printError("Compiler 'cxx' is not set. Defaulting to g++.")
+    if (cc.isEmpty) printWarn("Compiler 'cc' is not set. Defaulting to gcc.")
+    if (cxx.isEmpty) printWarn("Compiler 'cxx' is not set. Defaulting to g++.")
     if (fc.isEmpty)
       printWarn("Compiler 'fc' is not set. Defaulting to gfortran.")
     if (mpicc.isEmpty)
-      printError("MPI C compiler 'mpicc' is not set. Defaulting to mpicc.")
+      printWarn("MPI C compiler 'mpicc' is not set. Defaulting to mpicc.")
     if (mpicxx.isEmpty)
-      printError("MPI C++ compiler 'mpicxx' is not set. Defaulting to mpicxx.")
+      printWarn("MPI C++ compiler 'mpicxx' is not set. Defaulting to mpicxx.")
     if (mpifc.isEmpty)
       printWarn(
         "MPI Fortran compiler 'mpifc' is not set. Defaulting to mpif90."

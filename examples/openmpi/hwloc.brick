@@ -1,6 +1,6 @@
 @source gh:open-mpi/hwloc:v2.x
 
 ./autogen.sh
-./configure --prefix="${HWLOC_INSTALL_DIR}"
+CC={{ comp.cc }} CXX={{ comp.cxx }} ./configure --prefix="{{ dir.install }}"
 make -j $NUM_THREADS
 make install

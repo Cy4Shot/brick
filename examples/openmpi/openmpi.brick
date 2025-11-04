@@ -4,8 +4,8 @@
 @dep hwloc
 
 ./configure \
-    --prefix="${OPENMPI_INSTALL_DIR}" \
-    --with-pmix=${OPENPMIX_INSTALL_DIR} \
-    --with-hwloc=${HWLOC_INSTALL_DIR}
-make -j $NUM_THREADS
+    --prefix="{{ dir.install }}" \
+    --with-pmix="{{ dir.install.openpmix }}" \
+    --with-hwloc="{{ dir.install.hwloc }}"
+make -j {{ sys.nproc }}
 make install

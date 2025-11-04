@@ -10,6 +10,7 @@ import os.*
 import java.nio.file.{Files, Path, Paths}
 import brick.util.FileUtil
 import scala.scalanative.meta.LinktimeInfo.target
+import brick.conc.BricksCtx
 
 object BrickCompiler {
 
@@ -48,11 +49,18 @@ object BrickCompiler {
           val tree: List[Bricks] = BrickConcretizer.concretize(brickDir)
           for (bricks <- tree) {
             val targetPath = outputDir.sub(bricks.name)
-            ConfigGenerator(bricks.ctx).write(targetPath, "config")
+            ConfigGenerator(bricks).write(targetPath, "config")
             UtilsGenerator().write(targetPath, "utils")
             for (brick <- bricks.bricks) {
-              BricksGenerator(brick, bricks.ctx)
-                .write(targetPath.sub("pkg"), brick.name)
+              BricksGenerator(
+                brick,
+                BricksCtx(
+                  brick,
+                  bricks.bricks,
+                  bricks.compilers,
+                  bricks.compilerFlags
+                )
+              ).write(targetPath.sub("pkg"), brick.name)
             }
             MainGenerator(bricks).write(targetPath, "main", true)
             printSuccess(

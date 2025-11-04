@@ -18,6 +18,8 @@ case class Brick(
 )
 
 case class BricksCtx(
+    brick: Brick,
+    bricks: List[Brick],
     compilers: Map[String, String],
     compilerFlags: Map[String, List[String]]
 )
@@ -26,5 +28,6 @@ case class Bricks(
     name: String,
     bricks: List[Brick],
     packages: List[String],
-    ctx: BricksCtx
+    compilers: Map[String, String],
+    compilerFlags: Map[String, List[String]]
 )

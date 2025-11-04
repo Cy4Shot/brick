@@ -33,8 +33,38 @@ object BrickTmplProc {
     given SymbolTable = builtin.flatten()
     typecheck(stmt)
     val evalled = eval(stmt).toString()
-    println(s"Parsed expression: ${stmt} => Evaluated to: $evalled")
+    // println(s"Parsed expression: ${stmt} => Evaluated to: $evalled")
     evalled
+  }
+
+  private def resolveIdentifier(
+      name: String,
+      symbols: SymbolTable,
+      ctx: BricksCtx
+  ): (BricksCtx => Any, brick.parse.tmpl.Type.Type) = {
+    symbols.get(name) match {
+      case Some(Left((handler, ty))) => (handler, ty)
+      case Some(Right(_)) =>
+        throw new RuntimeException(s"Unexpected wildcard entry for: $name")
+      case None =>
+        val wildcardMatch = symbols.iterator
+          .find {
+            case (pattern, Right(_)) if pattern.endsWith(".*") =>
+              val prefix = pattern.stripSuffix(".*")
+              name.startsWith(prefix + ".")
+            case _ => false
+          }
+          .collect { case (pattern, Right((wildcardHandler, ty))) =>
+            val prefix = pattern.stripSuffix(".*")
+            val captured = name.stripPrefix(prefix + ".")
+            val handler: BricksCtx => Any = wildcardHandler(captured)
+            (handler, ty)
+          }
+
+        wildcardMatch.getOrElse(
+          throw new RuntimeException(s"Undefined variable: $name")
+        )
+    }
   }
 
   def eval(stmt: TmplStmt)(using SymbolTable)(using BricksCtx): Any =
@@ -58,13 +88,8 @@ object BrickTmplProc {
 
       // ---------- Identifiers ----------
       case Identifier(Ident(name)) =>
-        symbols
-          .getOrElse(
-            name,
-            throw new RuntimeException(s"Undefined variable: $name")
-          )
-          ._1
-          .apply(ctx)
+        val (handler, _) = resolveIdentifier(name, symbols, ctx)
+        handler.apply(ctx)
 
       // ---------- Unary ----------
       case Not(e) => !eval(e).asInstanceOf[Boolean]

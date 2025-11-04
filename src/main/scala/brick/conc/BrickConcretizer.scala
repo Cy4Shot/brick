@@ -148,7 +148,8 @@ object BrickConcretizer {
         target.opt,
         flattenToCompilationOrder(tree),
         packages,
-        BricksCtx(compilers, compilerFlags)
+        compilers,
+        compilerFlags
       )
     }
   }
